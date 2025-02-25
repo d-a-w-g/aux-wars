@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap');
 
 .album-display {
     background-color: #121212;
@@ -12,4 +13,16 @@
     }
 }  
 
+.button {
+  padding: 20px 24px;
+  background-color: #68d570;
+  color: #121212;
+  border: none;
+  border-radius: 80px;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  width: 400px;
+  font-size: 20px;
+  margin-top: 200px;
+}
   
