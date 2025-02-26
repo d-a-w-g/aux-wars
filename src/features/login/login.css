@@ -1,16 +1,31 @@
 @import "tailwindcss";
 
-.button {
-    padding: 20px 24px;
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 90%; 
+    max-width: 500px; 
+    min-width: 300px; 
+    padding: 40px;
+    border-radius: 20px; 
+    margin-top: 15vh;
+}
+
+.join-game-button {
+    padding: 8px 15px;
     background-color: #68d570;
     color: #121212;
     border: none;
     border-radius: 80px;
     cursor: pointer;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    width: 100%;        
-    max-width: 400px;    
-    font-size: 20px;
+    width: 60%;        
+    max-width: 300px;   
+    font-size: 18px;
+    margin-top: 20px; 
 }
 
 .text-field {
@@ -18,12 +33,32 @@
     border: none;             
     border-bottom: 2px solid white;
     padding: 8px 0;         
-    width: 100%;
-    max-width: 400px;
+    width: 60%;        
+    max-width: 300px;  
     font-size: 16px;
     color: white;            
     outline: none;
-    margin-bottom: 30px; 
+    margin-bottom: 10px; 
     font-family: 'Plus Jakarta Sans', sans-serif;
+    text-align: center;
+    
+}
 
-  }
+.host-a-game-button {
+    padding: 8px 15px;
+    background-color: white;
+    color: #121212;
+    border: none;
+    border-radius: 80px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 60%;        
+    max-width: 300px;  
+    font-size: 18px;
+    margin-top: 175px; 
+}
+
+.logo {
+    width: 500px;
+    margin-bottom: 50px; 
+}
