@@ -1,4 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 @import "tailwindcss";
+
+@theme {
+    --default-font-family: "Plus Jakarta Sans"; 
+}
 
 .album-display {
     background-color: #121212;
@@ -12,4 +17,24 @@
     }
 }  
 
-  
+.spotify-btn {
+    background-color: #68D570;
+    width: 300px;
+
+    @media screen and (max-width: 768px) {
+        width: 75%;
+    }
+}
+
+.guest-btn {
+    background-color: white;
+    width: 300px;
+
+    @media screen and (max-width: 768px) {
+        width: 75%;
+      }
+}
+
+.game-info {
+    color: #B9B9B9;
+}
