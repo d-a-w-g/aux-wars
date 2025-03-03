@@ -49,6 +49,30 @@
   }
 }
 
+.lobby-info {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.lobby-code-count {
+  display: flex;
+  width: 100%;
+}
+
+.lobby-container {
+  background-color: #242424;
+  padding: 1rem;
+  width: 100%;
+  opacity: 85%;
+}
+
+
 .lobby-players {
   display: flex;
   flex-direction: column;
@@ -87,4 +111,21 @@
   opacity: 70%;
   top: 0;
   color: white;
+}
+
+.round-settings {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.round-container {
+  background-color: #242424;
+  padding: 2rem;
+  opacity: 85%;
 }

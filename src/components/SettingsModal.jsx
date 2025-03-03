@@ -1,4 +1,3 @@
-// src/components/SettingsModal.jsx
 import React, { useEffect } from "react";
 
 export default function SettingsModal({ showModal, onClose }) {

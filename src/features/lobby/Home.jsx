@@ -9,12 +9,10 @@ export default function Home() {
   const navigate = useNavigate();
   const [joinCode, setJoinCode] = useState("");
 
-  // Host game: emits the "host-game" event and navigates with the new game code.
   const handleHostGame = () => {
     if (!socket) return;
     socket.emit("host-game", (response) => {
       if (response.success) {
-        // Navigate to the lobby route with the generated game code.
         navigate(`/lobby/${response.gameCode}`);
       } else {
         console.error("Failed to host game.");
@@ -22,7 +20,6 @@ export default function Home() {
     });
   };
 
-  // Join game: emits the "join-game" event with the provided game code.
   const handleJoinGame = () => {
     if (!socket) return;
     if (!joinCode.trim()) {

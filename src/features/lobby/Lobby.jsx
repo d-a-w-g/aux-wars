@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import PlayerList from "../../components/PlayerList";
 import SettingsModal from "../../components/SettingsModal";
 import logo from "../../assets/aux-wars-logo.svg";
-import spotifyIcon from "../../assets/spotify-icon.svg";
+import settingsIcon from "../../assets/settings-btn.svg";
 
 export default function Lobby() {
   const socket = useSocket();
@@ -31,9 +31,13 @@ export default function Lobby() {
         if (response.success) {
           setGameCode(response.gameCode);
           // Immediately join the newl y hosted game (even if name is empty).
-          socket.emit("join-game", { gameCode: response.gameCode, name }, (res) => {
-            if (!res.success) console.error(res.message);
-          });
+          socket.emit(
+            "join-game",
+            { gameCode: response.gameCode, name },
+            (res) => {
+              if (!res.success) console.error(res.message);
+            }
+          );
         } else {
           console.error("Failed to host game");
         }
@@ -41,9 +45,13 @@ export default function Lobby() {
     } else {
       setGameCode(routeGameCode);
       // Immediately join the existing game regardless of name.
-      socket.emit("join-game", { gameCode: routeGameCode, name }, (response) => {
-        if (!response.success) console.error(response.message);
-      });
+      socket.emit(
+        "join-game",
+        { gameCode: routeGameCode, name },
+        (response) => {
+          if (!response.success) console.error(response.message);
+        }
+      );
     }
 
     // Listen for updates on the player list.
@@ -84,8 +92,11 @@ export default function Lobby() {
 
   return (
     <>
-      <div className={`player-lobby h-svh flex flex-col relative z-10 ${showModal ? "blur-sm" : ""}`}>
-        {/* Header */}
+      <div
+        className={`player-lobby h-svh flex flex-col w-full ${
+          showModal ? "blur-sm" : ""
+        }`}
+      >
         <div className="lobby-header flex justify-between items-center mt-10 container mx-auto p-5">
           <div className="lobby-header-left flex items-center gap-2">
             <img src={logo} alt="Logo" className="min-w-10" />
@@ -96,13 +107,15 @@ export default function Lobby() {
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
           >
-            <button className="leave-btn rounded-full py-2 px-4" onClick={handleLeaveGame}>
+            <button
+              className="spotify-btn rounded-full py-2 px-4"
+              onClick={handleLeaveGame}
+            >
               <p className="text-xs md:text-sm">Leave Lobby</p>
             </button>
           </motion.div>
         </div>
 
-        {/* Body */}
         <div className="lobby-body">
           <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
             <p className="text-xl">Nickname:</p>
@@ -116,7 +129,11 @@ export default function Lobby() {
                   const newName = e.target.value;
                   setName(newName);
                   // Update the player's name immediately on change.
-                  socket.emit("update-player-name", { gameCode, name: newName, isReady });
+                  socket.emit("update-player-name", {
+                    gameCode,
+                    name: newName,
+                    isReady,
+                  });
                 }}
                 animate={animateInput ? pulseAnimation : {}}
               />
@@ -135,26 +152,19 @@ export default function Lobby() {
                   initial={{ scale: 1 }}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="w-full flex items-center justify-center"
                 >
                   <button
                     className={
                       isReady
-                        ? "join-btn rounded-full py-2 px-8"
-                        : "spotify-btn rounded-full py-2 px-8"
+                        ? "spotify-btn rounded-full py-2 px-8 text-black"
+                        : "bg-white rounded-full py-2 px-8 text-black w-full max-w-md"
                     }
                     onClick={handleReady}
                   >
-                    <p className="text-sm md:text-base">{isReady ? "Ready" : "Not Ready"}</p>
-                  </button>
-                </motion.div>
-                <motion.div
-                  initial={{ scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                >
-                  <button className="spotify-btn rounded-full py-2 px-8">
-                    <img src={spotifyIcon} alt="Spotify Icon" className="min-w-8" />
-                    <p className="text-sm md:text-base">Powered By SpotifyAPI</p>
+                    <p className="text-sm md:text-base">
+                      {isReady ? "Ready" : "Not Ready"}
+                    </p>
                   </button>
                 </motion.div>
               </div>
@@ -162,7 +172,12 @@ export default function Lobby() {
             <div className="flex w-full items-center justify-between">
               <p className="text-center text-2xl">Players</p>
               <button onClick={() => setShowModal(true)}>
-                {/* You can add a settings icon here if desired */}
+                <img
+                  src={settingsIcon}
+                  alt=""
+                  className="min-w-6"
+                  onClick={() => setShowModal(true)}
+                />
               </button>
             </div>
             <PlayerList players={players} />
@@ -174,7 +189,10 @@ export default function Lobby() {
           )}
         </div>
       </div>
-      <SettingsModal showModal={showModal} onClose={() => setShowModal(false)} />
+      <SettingsModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </>
   );
 }
