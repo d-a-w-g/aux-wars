@@ -48,3 +48,43 @@
     width: 100%;
   }
 }
+
+.lobby-players {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-weight: normal;
+}
+
+.lobby-player {
+  background-color: #242424;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  opacity: 85%;
+}
+
+.ready {
+  color: #68d570;
+  font-weight: bold;
+}
+
+.not-ready {
+  color: #ff2929;
+  font-weight: bold;
+}
+
+.start-btn {
+  background-color: #68d570;
+}
+
+.settings-modal {
+  position: fixed;
+  background-color: #121212;
+  width: 100svw;
+  height: 100svh;
+  opacity: 70%;
+  top: 0;
+  color: white;
+}
