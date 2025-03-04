@@ -1,4 +1,3 @@
-// src/pages/Lobby.jsx
 import React, { useState, useEffect } from "react";
 import { useSocket } from "../../services/SocketProvider";
 import { useNavigate, useParams } from "react-router-dom";
@@ -30,25 +29,36 @@ export default function Lobby() {
         if (response.success) {
           setGameCode(response.gameCode);
           socket.emit("join-game", { gameCode: response.gameCode, name }, (res) => {
-            if (!res.success) console.error(res.message);
+            if (!res.success) {
+              console.error("Join failed:", res.message);
+              navigate("/lobby"); // Redirect if join fails
+            }
           });
-        } else console.error("Failed to host game");
+        } else {
+          console.error("Failed to host game");
+          navigate("/lobby");
+        }
       });
     } else {
       setGameCode(routeGameCode);
       socket.emit("join-game", { gameCode: routeGameCode, name }, (response) => {
-        if (!response.success) console.error(response.message);
+        console.log("join-game callback response", response);
+        if (!response.success) {
+          console.error("Join failed:", response.message);
+          navigate("/lobby"); // Redirect if game doesn't exist
+        }
       });
     }
     socket.on("update-players", (updatedPlayers) => setPlayers(updatedPlayers));
     return () => socket.off("update-players");
-  }, [socket, routeGameCode]);
+  }, [socket, routeGameCode, navigate]);
 
   useEffect(() => {
     const currentPlayer = players.find((player) => player.id === socket?.id);
     if (currentPlayer) setIsHost(currentPlayer.isHost);
   }, [players, socket]);
 
+  // This useEffect will update the player's name and ready status (and is independent of the join-game effect)
   useEffect(() => {
     if (gameCode) socket.emit("update-player-name", { gameCode, name, isReady });
   }, [name, isReady, gameCode, socket]);
@@ -74,6 +84,10 @@ export default function Lobby() {
   const pulseAnimation = { scale: [1, 1.05, 1], transition: { duration: 1, repeat: 3, ease: "easeInOut" } };
 
   const handleReady = () => {
+    if (!name.trim()) {
+      alert("Please set your nickname before readying up.");
+      return;
+    }
     setIsReady((prev) => !prev);
     socket.emit("update-player-name", { gameCode, name, isReady: !isReady });
   };
@@ -133,14 +147,13 @@ export default function Lobby() {
             </div>
             <PlayerList players={players} />
           </div>
-          {isHost && allPlayersReady && (
+          {isHost && allPlayersReady && players.length > 2 && (
             <button className="green-btn fixed bottom-0 w-full text-black py-3 text-center">
               Start Game
             </button>
           )}
         </div>
       </div>
-      {/* Pass gameCode to SettingsModal */}
       <SettingsModal showModal={showModal} onClose={() => setShowModal(false)} gameCode={gameCode} />
     </>
   );
