@@ -56,7 +56,7 @@ export default function SettingsModal({ showModal, onClose, gameCode }) {
 
   return (
     <div className="settings-modal z-10 fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-      <div className="w-full max-w-xl mx-auto p-5 bg-gray-900 rounded-md max-h-full overflow-y-auto">
+      <div className="w-full max-w-xl mx-auto p-5 rounded-md max-h-full overflow-y-auto">
         <div className="round-settings">
           <p className="text-md font-semibold text-white">Number of Rounds:</p>
           <div className="flex flex-col gap-5 w-full">

@@ -14,8 +14,15 @@ const io = new Server(server, {
   },
 });
 
-// In-memory storage for game rooms
+// In-memory storage for game rooms.
+// Each room is an object with players, settings, and phase.
 const gameRooms = new Map();
+
+const defaultSettings = {
+  numberOfRounds: 3,
+  roundLength: 30, // in seconds
+  selectedPrompts: ["General"],
+};
 
 const generateGameCode = () => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -31,8 +38,12 @@ io.on("connection", (socket) => {
 
   socket.on("host-game", (callback) => {
     const gameCode = generateGameCode();
-    // Create a new room with the host as the first player.
-    gameRooms.set(gameCode, [{ id: socket.id, name: "", isHost: true }]);
+    // Create a new room with host, default settings, and starting phase.
+    gameRooms.set(gameCode, {
+      players: [{ id: socket.id, name: "", isHost: true }],
+      settings: defaultSettings,
+      phase: "lobby",
+    });
     socket.join(gameCode);
     console.log(`Game hosted: ${gameCode} by ${socket.id}`);
     callback({ success: true, gameCode });
@@ -44,18 +55,18 @@ io.on("connection", (socket) => {
       callback({ success: false, message: "Game code not found" });
       return;
     }
-    const players = gameRooms.get(gameCode);
+    const room = gameRooms.get(gameCode);
     // Check if this socket is already in the players list.
-    const existingPlayer = players.find((player) => player.id === socket.id);
+    const existingPlayer = room.players.find((player) => player.id === socket.id);
     if (!existingPlayer) {
-      // If not present, add it.
-      players.push({ id: socket.id, name, isHost: false });
+      room.players.push({ id: socket.id, name, isHost: false });
     } else {
-      // If already present, update the name if it has changed.
       existingPlayer.name = name;
     }
     socket.join(gameCode);
-    io.to(gameCode).emit("update-players", players);
+    // Emit players and phase update so new joiners are in sync.
+    io.to(gameCode).emit("update-players", room.players);
+    io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
     console.log(`${socket.id} joined game ${gameCode}`);
     callback({ success: true });
   });
@@ -63,12 +74,11 @@ io.on("connection", (socket) => {
   socket.on("update-player-name", (data) => {
     const { gameCode, name, isReady } = data;
     if (!gameRooms.has(gameCode)) return;
-    const players = gameRooms.get(gameCode);
-    const updatedPlayers = players.map((p) =>
+    const room = gameRooms.get(gameCode);
+    room.players = room.players.map((p) =>
       p.id === socket.id ? { ...p, name, isReady } : p
     );
-    gameRooms.set(gameCode, updatedPlayers);
-    io.to(gameCode).emit("update-players", updatedPlayers);
+    io.to(gameCode).emit("update-players", room.players);
   });
 
   socket.on("update-game-settings", (data) => {
@@ -80,36 +90,44 @@ io.on("connection", (socket) => {
     console.log(`Game settings updated in room ${gameCode} by ${socket.id}`);
   });
 
+  socket.on("start-game", (data) => {
+    const { gameCode } = data;
+    const room = gameRooms.get(gameCode);
+    if (room) {
+      room.phase = "roundStart";
+      // Broadcast the new phase and a game-started event.
+      io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
+      io.to(gameCode).emit("game-started");
+    }
+  });
+
   socket.on("leave-game", (data) => {
     const { gameCode } = data;
     socket.leave(gameCode);
     if (gameRooms.has(gameCode)) {
-      const players = gameRooms.get(gameCode);
-      const updatedPlayers = players.filter(
+      const room = gameRooms.get(gameCode);
+      room.players = room.players.filter(
         (player) => player.id !== socket.id
       );
       // If the host left, assign a new host (if available)
       if (
-        players.find((player) => player.id === socket.id && player.isHost) &&
-        updatedPlayers.length > 0
+        room.players.find((player) => player.id === socket.id && player.isHost) &&
+        room.players.length > 0
       ) {
-        updatedPlayers[0].isHost = true;
+        room.players[0].isHost = true;
       }
-      gameRooms.set(gameCode, updatedPlayers);
-      io.to(gameCode).emit("update-players", updatedPlayers);
+      io.to(gameCode).emit("update-players", room.players);
       console.log(`${socket.id} left game ${gameCode}`);
     }
   });
 
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
-    gameRooms.forEach((players, gameCode) => {
-      const updatedPlayers = players.filter(
-        (player) => player.id !== socket.id
-      );
-      if (updatedPlayers.length !== players.length) {
-        gameRooms.set(gameCode, updatedPlayers);
-        io.to(gameCode).emit("update-players", updatedPlayers);
+    gameRooms.forEach((room, gameCode) => {
+      const originalLength = room.players.length;
+      room.players = room.players.filter((player) => player.id !== socket.id);
+      if (room.players.length !== originalLength) {
+        io.to(gameCode).emit("update-players", room.players);
         console.log(`${socket.id} removed from game ${gameCode}`);
       }
     });

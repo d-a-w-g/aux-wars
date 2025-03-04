@@ -23,7 +23,10 @@ export default function Lobby() {
   const allPlayersReady = players.every((player) => player.isReady);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      navigate("/lobby");
+      return;
+    }
     if (!routeGameCode) {
       socket.emit("host-game", (response) => {
         if (response.success) {
@@ -31,7 +34,7 @@ export default function Lobby() {
           socket.emit("join-game", { gameCode: response.gameCode, name }, (res) => {
             if (!res.success) {
               console.error("Join failed:", res.message);
-              navigate("/lobby"); // Redirect if join fails
+              navigate("/lobby");
             }
           });
         } else {
@@ -45,7 +48,7 @@ export default function Lobby() {
         console.log("join-game callback response", response);
         if (!response.success) {
           console.error("Join failed:", response.message);
-          navigate("/lobby"); // Redirect if game doesn't exist
+          navigate("/lobby");
         }
       });
     }
@@ -58,7 +61,7 @@ export default function Lobby() {
     if (currentPlayer) setIsHost(currentPlayer.isHost);
   }, [players, socket]);
 
-  // This useEffect will update the player's name and ready status (and is independent of the join-game effect)
+  // Update player's name and ready status
   useEffect(() => {
     if (gameCode) socket.emit("update-player-name", { gameCode, name, isReady });
   }, [name, isReady, gameCode, socket]);
@@ -74,14 +77,40 @@ export default function Lobby() {
     return () => socket.off("game-settings-updated");
   }, [socket, dispatch]);
 
+  // Listen for phase updates to enforce correct routing
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("game-phase-updated", ({ phase }) => {
+      if (phase !== "lobby") {
+        // For example, if phase is "roundStart", force navigation with replace
+        if (phase === "roundStart") {
+          navigate(`/lobby/${gameCode}/roundstart`, { replace: true });
+        }
+      }
+    });
+    return () => socket.off("game-phase-updated");
+  }, [socket, gameCode, navigate]);
+
+  // Listen for "game-started" event and navigate accordingly using replace.
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("game-started", () => {
+      navigate(`/lobby/${gameCode}/roundstart`, { replace: true });
+    });
+    return () => socket.off("game-started");
+  }, [socket, gameCode, navigate]);
+
   const handleLeaveGame = () => {
     if (gameCode) {
       socket.emit("leave-game", { gameCode });
-      navigate("/");
+      navigate("/lobby", { replace: true });
     }
   };
 
-  const pulseAnimation = { scale: [1, 1.05, 1], transition: { duration: 1, repeat: 3, ease: "easeInOut" } };
+  const pulseAnimation = {
+    scale: [1, 1.05, 1],
+    transition: { duration: 1, repeat: 3, ease: "easeInOut" },
+  };
 
   const handleReady = () => {
     if (!name.trim()) {
@@ -94,14 +123,23 @@ export default function Lobby() {
 
   return (
     <>
-      <div className={`player-lobby h-svh flex flex-col w-full ${showModal ? "blur-sm" : ""}`}>
+      <div
+        className={`player-lobby h-svh flex flex-col w-full ${showModal ? "blur-sm" : ""}`}
+      >
         <div className="lobby-header flex justify-between items-center mt-10 container mx-auto p-5">
           <div className="lobby-header-left flex items-center gap-2">
             <img src={logo} alt="Logo" className="min-w-10" />
             <p className="text-2xl text-white">Lobby</p>
           </div>
-          <motion.div initial={{ scale: 1 }} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
-            <button className="green-btn rounded-full py-2 px-4 font-semibold" onClick={handleLeaveGame}>
+          <motion.div
+            initial={{ scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          >
+            <button
+              className="green-btn rounded-full py-2 px-4 font-semibold"
+              onClick={handleLeaveGame}
+            >
               <p className="text-xs md:text-sm">Leave Lobby</p>
             </button>
           </motion.div>
@@ -129,12 +167,23 @@ export default function Lobby() {
                 </div>
               </div>
               <div className="flex flex-col items-center gap-5">
-                <motion.div className="w-full flex items-center justify-center" initial={{ scale: 1 }} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
+                <motion.div
+                  className="w-full flex items-center justify-center"
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
                   <button
-                    className={isReady ? "green-btn rounded-full py-2 px-8 text-black font-semibold w-full max-w-md" : "bg-white rounded-full py-2 px-8 text-black w-full max-w-md font-semibold"}
+                    className={
+                      isReady
+                        ? "green-btn rounded-full py-2 px-8 text-black font-semibold w-full max-w-md"
+                        : "bg-white rounded-full py-2 px-8 text-black w-full max-w-md font-semibold"
+                    }
                     onClick={handleReady}
                   >
-                    <p className="text-sm md:text-base">{isReady ? "Ready" : "Not Ready"}</p>
+                    <p className="text-sm md:text-base">
+                      {isReady ? "Ready" : "Not Ready"}
+                    </p>
                   </button>
                 </motion.div>
               </div>
@@ -148,13 +197,22 @@ export default function Lobby() {
             <PlayerList players={players} />
           </div>
           {isHost && allPlayersReady && players.length > 2 && (
-            <button className="green-btn fixed bottom-0 w-full text-black py-3 text-center">
+            <button
+              className="green-btn fixed bottom-0 w-full text-black py-3 text-center"
+              onClick={() => {
+                socket.emit("start-game", { gameCode });
+              }}
+            >
               Start Game
             </button>
           )}
         </div>
       </div>
-      <SettingsModal showModal={showModal} onClose={() => setShowModal(false)} gameCode={gameCode} />
+      <SettingsModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        gameCode={gameCode}
+      />
     </>
   );
 }

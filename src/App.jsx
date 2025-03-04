@@ -7,6 +7,8 @@ import Home from "./features/lobby/Home";
 import { SocketProvider } from "./services/SocketProvider";
 import Lobby from "./features/lobby/Lobby";
 import { GameProvider } from "./services/GameContext";
+import RoundStart from "./features/song-selection/RoundStart";
+import SongSelection from "./features/song-selection/SongSelection";
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
               <Route path="lobby" element={<Home />} />
               <Route path="callback" element={<SpotifyCallback />} />
               <Route path="/lobby/:gameCode" element={<Lobby />} />
+              <Route path="lobby/:gameCode/roundstart" element={<RoundStart />} />
+              <Route path="lobby/:gameCode/songselect" element={<SongSelection />} />
             </Route>
           </Routes>
         </Router>
