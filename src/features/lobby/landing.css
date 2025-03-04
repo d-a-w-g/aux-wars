@@ -39,6 +39,19 @@
     width: 60%;        
     max-width: 300px;  
     font-size: 18px;
-    margin-top: 175px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     z-index: inherit;
+}
+
+.logo {
+    width: 500px;
+    margin-top: -200px;
+    margin-bottom: 50px; 
+}
+
+.text-to-play {
+    color: lightgray;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
