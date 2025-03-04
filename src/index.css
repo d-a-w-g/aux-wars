@@ -35,6 +35,11 @@
   }
 }
 
+.green-btn {
+  background-color: #68d570;
+  color: black;
+}
+
 .game-info {
   color: #b9b9b9;
 }
@@ -99,10 +104,6 @@
   font-weight: bold;
 }
 
-.start-btn {
-  background-color: #68d570;
-}
-
 .settings-modal {
   position: fixed;
   background-color: #121212;
@@ -128,4 +129,11 @@
   background-color: #242424;
   padding: 2rem;
   opacity: 85%;
+}
+
+.selected-round-container {
+  background-color: #68d570;
+  padding: 2rem;
+  opacity: 85%;
+  color: white;
 }

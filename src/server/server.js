@@ -61,15 +61,23 @@ io.on("connection", (socket) => {
   });
 
   socket.on("update-player-name", (data) => {
-    const { gameCode, name } = data;
-    if (gameRooms.has(gameCode)) {
-      const players = gameRooms.get(gameCode);
-      const updatedPlayers = players.map((player) =>
-        player.id === socket.id ? { ...player, name } : player
-      );
-      gameRooms.set(gameCode, updatedPlayers);
-      io.to(gameCode).emit("update-players", updatedPlayers);
-    }
+    const { gameCode, name, isReady } = data;
+    if (!gameRooms.has(gameCode)) return;
+    const players = gameRooms.get(gameCode);
+    const updatedPlayers = players.map((p) =>
+      p.id === socket.id ? { ...p, name, isReady } : p
+    );
+    gameRooms.set(gameCode, updatedPlayers);
+    io.to(gameCode).emit("update-players", updatedPlayers);
+  });
+
+  socket.on("update-game-settings", (data) => {
+    const { gameCode, numberOfRounds, roundLength, selectedPrompts } = data;
+    if (!gameRooms.has(gameCode)) return;
+    const room = gameRooms.get(gameCode);
+    room.settings = { numberOfRounds, roundLength, selectedPrompts };
+    io.to(gameCode).emit("game-settings-updated", room.settings);
+    console.log(`Game settings updated in room ${gameCode} by ${socket.id}`);
   });
 
   socket.on("leave-game", (data) => {
@@ -77,7 +85,9 @@ io.on("connection", (socket) => {
     socket.leave(gameCode);
     if (gameRooms.has(gameCode)) {
       const players = gameRooms.get(gameCode);
-      const updatedPlayers = players.filter((player) => player.id !== socket.id);
+      const updatedPlayers = players.filter(
+        (player) => player.id !== socket.id
+      );
       // If the host left, assign a new host (if available)
       if (
         players.find((player) => player.id === socket.id && player.isHost) &&
@@ -94,7 +104,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
     gameRooms.forEach((players, gameCode) => {
-      const updatedPlayers = players.filter((player) => player.id !== socket.id);
+      const updatedPlayers = players.filter(
+        (player) => player.id !== socket.id
+      );
       if (updatedPlayers.length !== players.length) {
         gameRooms.set(gameCode, updatedPlayers);
         io.to(gameCode).emit("update-players", updatedPlayers);

@@ -1,65 +1,115 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useGame } from "../services/GameContext";
+import { useSocket } from "../services/SocketProvider";
+import PromptTag from "./PromptTag";
 
-export default function SettingsModal({ showModal, onClose }) {
+export default function SettingsModal({ showModal, onClose, gameCode }) {
+  const { state, dispatch } = useGame();
+  const socket = useSocket();
+  const [rounds, setRounds] = useState(state.numberOfRounds);
+  const [roundLength, setRoundLength] = useState(state.roundLength);
+  const [selectedPrompts, setSelectedPrompts] = useState(state.selectedPrompts);
+
+  // Sync local state if game context changes externally.
   useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
+    setRounds(state.numberOfRounds);
+    setRoundLength(state.roundLength);
+    setSelectedPrompts(state.selectedPrompts);
+  }, [state.numberOfRounds, state.roundLength, state.selectedPrompts]);
 
-    if (showModal) {
-      document.addEventListener("keydown", handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") onClose();
     };
+    if (showModal) document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [showModal, onClose]);
 
   if (!showModal) return null;
 
+  const roundOptions = [1, 3, 5];
+  const lengthOptions = [15, 30, 60, 120];
+
+  const togglePrompt = (prompt) => {
+    if (selectedPrompts.includes(prompt)) {
+      setSelectedPrompts(selectedPrompts.filter((p) => p !== prompt));
+    } else {
+      setSelectedPrompts([...selectedPrompts, prompt]);
+    }
+  };
+
+  const applySettings = () => {
+    // Update local game context
+    dispatch({ type: "SET_ROUNDS", payload: rounds });
+    dispatch({ type: "SET_ROUND_LENGTH", payload: roundLength });
+    dispatch({ type: "SET_SELECTED_PROMPTS", payload: selectedPrompts });
+    
+    // Emit updated settings to the server so all clients get synchronized.
+    socket.emit("update-game-settings", {
+      gameCode,
+      numberOfRounds: rounds,
+      roundLength,
+      selectedPrompts
+    });
+    onClose();
+  };
+
   return (
-    <>
-      <div className="settings-modal z-10">
-        <div className="settings container mx-auto p-5 mt-32">
-          <div className="round-settings">
-            <p className="text-md font-semibold">Number of Rounds:</p>
-            <div className="flex flex-col gap-5 w-full">
-              <input type="text" className="w-full rounded-md" />
-              <p className="text-md font-semibold">Round Length:</p>
-              <div className="round-lengths grid grid-cols-2 gap-5 text-center font-normal text-xl">
-                <button>
-                  <div className="round-container rounded-md">
-                    <p>15 sec</p>
-                  </div>
+    <div className="settings-modal z-10 fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+      <div className="w-full max-w-xl mx-auto p-5 bg-gray-900 rounded-md max-h-full overflow-y-auto">
+        <div className="round-settings">
+          <p className="text-md font-semibold text-white">Number of Rounds:</p>
+          <div className="flex flex-col gap-5 w-full">
+            <input
+              type="text"
+              className="w-full rounded-md bg-gray-800 text-white p-2"
+              value={rounds}
+              onChange={(e) => setRounds(parseInt(e.target.value) || 0)}
+            />
+            <p className="text-md font-semibold text-white">Round Length:</p>
+            <div className="round-lengths grid grid-cols-2 gap-5 text-center font-normal text-xl">
+              {lengthOptions.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setRoundLength(opt)}
+                  className={
+                    roundLength === opt
+                      ? "selected-round-container p-2 rounded-md"
+                      : "round-container p-2 rounded-md"
+                  }
+                >
+                  <p>{opt >= 60 ? `${opt / 60} min` : `${opt} sec`}</p>
                 </button>
-                <button>
-                  <div className="round-container rounded-md">
-                    <p>30 sec</p>
-                  </div>
-                </button>
-                <button>
-                  <div className="round-container rounded-md">
-                    <p>1 min</p>
-                  </div>
-                </button>
-                <button>
-                  <div className="round-container rounded-md">
-                    <p>2 min</p>
-                  </div>
-                </button>
-              </div>
+              ))}
+            </div>
+            <p className="text-md font-semibold text-white">Select Prompts:</p>
+            <div className="flex gap-3 mt-2 flex-wrap">
+              {state.availablePrompts.map((prompt) => (
+                <PromptTag
+                  key={prompt}
+                  label={prompt}
+                  selected={selectedPrompts.includes(prompt)}
+                  onClick={() => togglePrompt(prompt)}
+                />
+              ))}
             </div>
           </div>
         </div>
+        <div className="flex flex-col gap-4 mt-4">
+          <button
+            onClick={applySettings}
+            className="w-full py-2 green-btn rounded-md text-white font-semibold"
+          >
+            Apply Settings
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full py-2 rounded-md text-white font-semibold"
+          >
+            Close
+          </button>
+        </div>
       </div>
-      <button
-        className="fixed bottom-0 w-full font-normal text-white py-10"
-        onClick={onClose}
-      >
-        <p className="text-center">close</p>
-      </button>
-    </>
+    </div>
   );
 }
