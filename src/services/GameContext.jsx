@@ -5,10 +5,28 @@ const GameContext = createContext();
 const defaultState = {
   numberOfRounds: 3,
   roundLength: 30,
-  availablePrompts: ["General", "Party", "Trivia", "Random", "Rock", "Pop", "Hip-Hop", "Jazz"],
-  selectedPrompts: ["General"],
-  roundEndTime: null,   // NEW: store the end time
-  currentPrompt: null,  // NEW: store the current round’s prompt
+  availablePrompts: [
+    "General",
+    "Party",
+    "Trivia",
+    "Random",
+    "Rock",
+    "Pop",
+    "Hip-Hop",
+    "Jazz"
+  ],
+  selectedPrompts: [
+    "General",
+    "Party",
+    "Trivia",
+    "Random",
+    "Rock",
+    "Pop",
+    "Hip-Hop",
+    "Jazz"
+  ],
+  roundEndTime: null,
+  currentPrompt: null,
 };
 
 function gameReducer(state, action) {
@@ -19,9 +37,9 @@ function gameReducer(state, action) {
       return { ...state, roundLength: action.payload };
     case "SET_SELECTED_PROMPTS":
       return { ...state, selectedPrompts: action.payload };
-    case "SET_ROUND_END_TIME":  // NEW
+    case "SET_ROUND_END_TIME":
       return { ...state, roundEndTime: action.payload };
-    case "SET_CURRENT_PROMPT":  // NEW
+    case "SET_CURRENT_PROMPT":
       return { ...state, currentPrompt: action.payload };
     default:
       return state;

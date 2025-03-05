@@ -31,12 +31,16 @@ export default function Lobby() {
       socket.emit("host-game", (response) => {
         if (response.success) {
           setGameCode(response.gameCode);
-          socket.emit("join-game", { gameCode: response.gameCode, name }, (res) => {
-            if (!res.success) {
-              console.error("Join failed:", res.message);
-              navigate("/lobby");
+          socket.emit(
+            "join-game",
+            { gameCode: response.gameCode, name },
+            (res) => {
+              if (!res.success) {
+                console.error("Join failed:", res.message);
+                navigate("/lobby");
+              }
             }
-          });
+          );
         } else {
           console.error("Failed to host game");
           navigate("/lobby");
@@ -44,13 +48,17 @@ export default function Lobby() {
       });
     } else {
       setGameCode(routeGameCode);
-      socket.emit("join-game", { gameCode: routeGameCode, name }, (response) => {
-        console.log("join-game callback response", response);
-        if (!response.success) {
-          console.error("Join failed:", response.message);
-          navigate("/lobby");
+      socket.emit(
+        "join-game",
+        { gameCode: routeGameCode, name },
+        (response) => {
+          console.log("join-game callback response", response);
+          if (!response.success) {
+            console.error("Join failed:", response.message);
+            navigate("/lobby");
+          }
         }
-      });
+      );
     }
     socket.on("update-players", (updatedPlayers) => setPlayers(updatedPlayers));
     return () => socket.off("update-players");
@@ -63,7 +71,8 @@ export default function Lobby() {
 
   // Update player's name and ready status
   useEffect(() => {
-    if (gameCode) socket.emit("update-player-name", { gameCode, name, isReady });
+    if (gameCode)
+      socket.emit("update-player-name", { gameCode, name, isReady });
   }, [name, isReady, gameCode, socket]);
 
   // Listen for game settings updates from the server
@@ -71,8 +80,14 @@ export default function Lobby() {
     if (!socket) return;
     socket.on("game-settings-updated", (updatedSettings) => {
       dispatch({ type: "SET_ROUNDS", payload: updatedSettings.numberOfRounds });
-      dispatch({ type: "SET_ROUND_LENGTH", payload: updatedSettings.roundLength });
-      dispatch({ type: "SET_SELECTED_PROMPTS", payload: updatedSettings.selectedPrompts });
+      dispatch({
+        type: "SET_ROUND_LENGTH",
+        payload: updatedSettings.roundLength,
+      });
+      dispatch({
+        type: "SET_SELECTED_PROMPTS",
+        payload: updatedSettings.selectedPrompts,
+      });
     });
     return () => socket.off("game-settings-updated");
   }, [socket, dispatch]);
@@ -82,23 +97,27 @@ export default function Lobby() {
     if (!socket) return;
     socket.on("game-phase-updated", ({ phase }) => {
       if (phase !== "lobby") {
-        // For example, if phase is "roundStart", force navigation with replace
+        // When phase is "roundStart", navigate to the round screen.
         if (phase === "roundStart") {
-          navigate(`/lobby/${gameCode}/roundstart`, { replace: true });
+          navigate(`/lobby/${gameCode}/round`, { replace: true });
         }
       }
     });
     return () => socket.off("game-phase-updated");
   }, [socket, gameCode, navigate]);
 
-  // Listen for "game-started" event and navigate accordingly using replace.
+  // Listen for "game-started" event, update current prompt, and navigate.
   useEffect(() => {
     if (!socket) return;
-    socket.on("game-started", () => {
-      navigate(`/lobby/${gameCode}/roundstart`, { replace: true });
+    socket.on("game-started", (data = {}) => {
+      const { prompt } = data;
+      if (prompt) {
+        dispatch({ type: "SET_CURRENT_PROMPT", payload: prompt });
+      }
+      navigate(`/lobby/${gameCode}/round`, { replace: true });
     });
     return () => socket.off("game-started");
-  }, [socket, gameCode, navigate]);
+  }, [socket, gameCode, navigate, dispatch]);
 
   const handleLeaveGame = () => {
     if (gameCode) {
@@ -124,7 +143,9 @@ export default function Lobby() {
   return (
     <>
       <div
-        className={`player-lobby h-svh flex flex-col w-full ${showModal ? "blur-sm" : ""}`}
+        className={`player-lobby h-svh flex flex-col w-full ${
+          showModal ? "blur-sm" : ""
+        }`}
       >
         <div className="lobby-header flex justify-between items-center mt-10 container mx-auto p-5">
           <div className="lobby-header-left flex items-center gap-2">

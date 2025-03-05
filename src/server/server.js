@@ -15,13 +15,13 @@ const io = new Server(server, {
 });
 
 // In-memory storage for game rooms.
-// Each room is an object with players, settings, and phase.
+// Each room is an object with players, settings, phase, and a currentPrompt.
 const gameRooms = new Map();
 
 const defaultSettings = {
   numberOfRounds: 3,
   roundLength: 30, // in seconds
-  selectedPrompts: ["General"],
+  selectedPrompts: ["General", "Party", "Trivia", "Random", "Rock", "Pop", "Hip-Hop", "Jazz"],
 };
 
 const generateGameCode = () => {
@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
       players: [{ id: socket.id, name: "", isHost: true }],
       settings: defaultSettings,
       phase: "lobby",
+      currentPrompt: null, // for prompt synchronization
     });
     socket.join(gameCode);
     console.log(`Game hosted: ${gameCode} by ${socket.id}`);
@@ -56,7 +57,7 @@ io.on("connection", (socket) => {
       return;
     }
     const room = gameRooms.get(gameCode);
-    // Check if this socket is already in the players list.
+    // Add the player if not already present
     const existingPlayer = room.players.find((player) => player.id === socket.id);
     if (!existingPlayer) {
       room.players.push({ id: socket.id, name, isHost: false });
@@ -67,6 +68,10 @@ io.on("connection", (socket) => {
     // Emit players and phase update so new joiners are in sync.
     io.to(gameCode).emit("update-players", room.players);
     io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
+    // If the prompt is already set, send it to the new joiner.
+    if (room.currentPrompt) {
+      socket.emit("prompt-updated", { prompt: room.currentPrompt });
+    }
     console.log(`${socket.id} joined game ${gameCode}`);
     callback({ success: true });
   });
@@ -90,14 +95,43 @@ io.on("connection", (socket) => {
     console.log(`Game settings updated in room ${gameCode} by ${socket.id}`);
   });
 
+  // Host triggers start-game. The server randomly selects a prompt
+  // from the room's selectedPrompts and broadcasts it.
   socket.on("start-game", (data) => {
     const { gameCode } = data;
     const room = gameRooms.get(gameCode);
     if (room) {
+      const prompts = room.settings.selectedPrompts;
+      const chosenPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+      room.currentPrompt = chosenPrompt;
       room.phase = "roundStart";
-      // Broadcast the new phase and a game-started event.
+      io.to(gameCode).emit("prompt-updated", { prompt: chosenPrompt });
       io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
-      io.to(gameCode).emit("game-started");
+      // Emit the game-started event with the prompt so clients can update if they missed prompt-updated.
+      io.to(gameCode).emit("game-started", { prompt: chosenPrompt });
+      console.log(`Game started in room ${gameCode} with prompt: ${chosenPrompt}`);
+    }
+  });
+
+  // Clients can request the current prompt if needed.
+  socket.on("request-prompt", (data) => {
+    const { gameCode } = data;
+    const room = gameRooms.get(gameCode);
+    console.log(`Prompt requested in room ${gameCode} by ${socket.id}`);
+    console.log(`Current prompt is: ${room.currentPrompt}`);
+    if (room && room.currentPrompt) {
+      socket.emit("prompt-updated", { prompt: room.currentPrompt });
+    }
+  });
+
+  // (Optional) Handle prompt updates from clients if needed.
+  socket.on("update-prompt", (data) => {
+    const { gameCode, prompt } = data;
+    if (gameRooms.has(gameCode)) {
+      const room = gameRooms.get(gameCode);
+      room.currentPrompt = prompt;
+      io.to(gameCode).emit("prompt-updated", { prompt });
+      console.log(`Prompt updated in room ${gameCode}: ${prompt}`);
     }
   });
 
