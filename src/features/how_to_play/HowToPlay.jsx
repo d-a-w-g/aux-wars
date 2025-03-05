@@ -1,8 +1,16 @@
 import React from 'react';
 import './how_to_play.css';
 import logo from './landing-logo.png';
+import { useNavigate } from 'react-router-dom';
 
 export default function HowToPlay() {
+
+    const navigate = useNavigate();
+
+    const handleBackToLogin = () => {
+      navigate('/landing');
+    };
+
   return (
     <div className="rules-background">
         <img src={logo} alt="Game Logo" className="rules-logo" />
@@ -24,7 +32,7 @@ export default function HowToPlay() {
           <li>5. At the end of the game, the player with the most records wins!</li>
         </ol>
       
-      <button className="back-to-login-button">Back to login</button>
+      <button className="back-to-login-button" onClick={handleBackToLogin}>Back to login</button>
     </div>
   );
 }
