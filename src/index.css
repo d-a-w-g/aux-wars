@@ -137,3 +137,13 @@
   opacity: 85%;
   color: white;
 }
+
+.search-bar {
+  width: 356px;
+  height: 56px;
+  background-color: #242424;
+  opacity: .85;
+  padding: 1rem;
+  font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

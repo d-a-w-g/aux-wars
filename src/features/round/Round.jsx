@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGame } from "../../services/GameContext";
 import { useSocket } from "../../services/SocketProvider";
-import { isTokenValid, refreshSpotifyToken } from "../../services/spotifyApi";
+import { searchSpotifyTracks } from "../../services/spotifyApi";
+import SongList from "../../components/SongList";
+import SearchBar from "../../components/SearchBar";
+import nextIcon from "../../assets/next-icon.svg";
 
 export default function Round() {
   const { gameCode } = useParams();
@@ -10,18 +13,15 @@ export default function Round() {
   const socket = useSocket();
   const { state, dispatch } = useGame();
 
-  // Local UI states
   const [isSongSelectionView, setIsSongSelectionView] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showPromptModal, setShowPromptModal] = useState(false);
 
-  // Listen for prompt updates from the server and update state.
+  // Listen for prompt updates
   useEffect(() => {
     if (socket) {
-      console.log("Listening for prompt-updated event");
       socket.on("prompt-updated", ({ prompt }) => {
-        console.log("Received prompt-updated event:", prompt);
         dispatch({ type: "SET_CURRENT_PROMPT", payload: prompt });
       });
     }
@@ -30,17 +30,14 @@ export default function Round() {
     };
   }, [socket, dispatch]);
 
-  // Request the prompt if not already set.
+  // If we have no prompt, request it from the server
   useEffect(() => {
-    console.log("Round is mounting; currentPrompt is:", state.currentPrompt);
     if (socket && !state.currentPrompt) {
-      console.log("Sending request-prompt for game code:", gameCode);
       socket.emit("request-prompt", { gameCode });
     }
   }, [socket, state.currentPrompt, gameCode]);
-  
 
-  // Listen for phase updates to enforce correct routing.
+  // Listen for phase changes (e.g., back to lobby)
   useEffect(() => {
     if (!socket) return;
     socket.on("game-phase-updated", ({ phase }) => {
@@ -51,104 +48,63 @@ export default function Round() {
     return () => socket.off("game-phase-updated");
   }, [socket, gameCode, navigate]);
 
-  // Spotify search logic (unchanged)
+  // Spotify search logic
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
       return;
     }
-    const delayDebounce = setTimeout(() => {
-      searchSpotifyTracks(searchTerm).then((tracks) => {
-        setSearchResults(tracks);
-      });
+    const delayDebounce = setTimeout(async () => {
+      const tracksOrError = await searchSpotifyTracks(searchTerm);
+      if (tracksOrError?.error === "refresh_revoked") {
+        // Refresh token was revoked
+        alert("Your Spotify login has expired. Please log in again.");
+        // Option 1: navigate user to login
+        navigate("/", { replace: true });
+        return;
+      }
+      // Otherwise, it's an array of tracks (or empty)
+      setSearchResults(tracksOrError);
     }, 500);
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
-
-  async function searchSpotifyTracks(query) {
-    let accessToken = localStorage.getItem("spotify_access_token");
-    if (!isTokenValid()) {
-      try {
-        accessToken = await refreshSpotifyToken();
-      } catch (error) {
-        console.error("Failed to refresh token:", error);
-        return [];
-      }
-    }
-    try {
-      const res = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-          query
-        )}&type=track&limit=10`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
-      const data = await res.json();
-      if (data.tracks) {
-        return data.tracks.items;
-      }
-    } catch (err) {
-      console.error("Spotify search failed:", err);
-    }
-    return [];
-  }
+  }, [searchTerm, navigate]);
 
   return (
-    <div className="round-start-songselect-page flex flex-col items-center justify-center text-white p-4">
+    <div className="round-start flex flex-col items-center justify-center text-white p-4">
       {!isSongSelectionView ? (
-        // --- Round Start View ---
-        <div className="round-start-view flex flex-col items-center">
-          <h1 className="text-4xl font-bold mb-4">Round Start</h1>
-          <div className="prompt text-2xl mb-2">The prompt is:</div>
-          <div className="prompt-text text-xl italic mb-8">
-            {state.currentPrompt || "Loading..."}
-          </div>
+        /* -------- Round Start View -------- */
+        <div className="flex flex-col items-center gap-10">
+          <h1 className="text-7xl font-bold">The prompt is:</h1>
+
+          {/* Reuse SearchBar for displaying the prompt (readOnly) */}
+          <SearchBar
+            value={state.currentPrompt || ""}
+            onChange={() => {}}
+            readOnly
+          />
+
           <button
             onClick={() => setIsSongSelectionView(true)}
-            className="green-btn py-2 px-4 rounded-md text-black font-semibold"
+            className="flex items-center justify-center gap-2 py-2 px-4 rounded-md text-white font-semibold cursor-pointer"
           >
-            Select Song &raquo;
+            <span>Select Song</span>
+            <img src={nextIcon} alt="Arrow Right" className="w-5 h-5 pt-0.5" />
           </button>
         </div>
       ) : (
-        // --- Song Selection View ---
+        /* -------- Song Selection View -------- */
         <div className="song-selection-view flex flex-col h-screen w-full">
-          <div className="search-bar px-4 mb-4">
-            <input
-              type="text"
-              placeholder="What do you want to play?"
-              className="w-full rounded-md p-2 text-black"
+          <div className="flex justify-center mt-32 mb-4 px-4">
+            {/* Reuse SearchBar for searching songs (NOT readOnly) */}
+            <SearchBar
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="What do you want to play?"
             />
           </div>
-          <div className="results-container flex-1 overflow-y-auto px-4">
-            {searchResults.map((track) => {
-              const albumCover =
-                track.album?.images?.[1]?.url ||
-                track.album?.images?.[0]?.url ||
-                "";
-              return (
-                <div
-                  key={track.id}
-                  className="song-item flex items-center p-2 mb-2 bg-gray-800 rounded-md h-20"
-                >
-                  <img
-                    src={albumCover}
-                    alt={track.name}
-                    className="w-16 h-16 object-cover rounded-md mr-4"
-                  />
-                  <div className="flex flex-col justify-center">
-                    <p className="font-semibold">{track.name}</p>
-                    <p className="text-sm text-gray-300">
-                      {track.artists.map((a) => a.name).join(", ")}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+
+          <SongList tracks={searchResults} />
+
           <div className="p-4">
             <button
               onClick={() => setShowPromptModal(true)}
@@ -159,6 +115,8 @@ export default function Round() {
           </div>
         </div>
       )}
+
+      {/* Prompt Modal */}
       {showPromptModal && (
         <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="modal-content bg-gray-900 p-6 rounded-md text-center">
