@@ -1,0 +1,90 @@
+/* 
+.song-container-winner{
+    display: flex;
+    max-width: 500px;
+}
+
+.record-image{
+    width: 10px;
+    height: 10px;
+}
+
+.album-image{
+    width: 10px;
+    height: 10px;
+} */
+
+
+.song-container-not-winner, .song-container-winner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    color: white;
+    font-family: 'Arial', sans-serif;
+}
+
+
+.song-container-winner {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 1.2em;
+}
+
+.song-container-winner .record-image {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 40px;
+    height: 40px;
+}
+
+
+.album-cover img {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+}
+
+
+.song-container-winner .album-cover img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+}
+
+
+.h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.h5 {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: lightgray;
+}
+
+
+.song-container-not-winner div:last-child, 
+.song-container-winner div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.record-image {
+    width: 20px;
+    height: 20px;
+}
