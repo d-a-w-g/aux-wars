@@ -7,7 +7,7 @@ export default function AppDisplay() {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <AlbumsDisplay albums={albums} />
-      <div className="relative flex items-center justify-center h-full">
+      <div className="relative flex items-center justify-center h-full z-10">
         <Outlet />
       </div>
     </div>
