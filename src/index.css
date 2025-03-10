@@ -147,3 +147,10 @@
   font-size: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+.prompt-modal {
+  background-color: #121212;
+  opacity: 70%;
+  top: 0;
+  color: white;
+}

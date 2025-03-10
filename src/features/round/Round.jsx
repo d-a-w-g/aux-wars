@@ -93,7 +93,11 @@ export default function Round() {
         </div>
       ) : (
         /* -------- Song Selection View -------- */
-        <div className="song-selection-view flex flex-col h-screen w-full">
+        <div
+          className={`song-selection-view flex flex-col h-screen w-full ${
+            showPromptModal ? "blur-sm" : ""
+          }`}
+        >
           <div className="flex justify-center mt-32 mb-4 px-4">
             {/* Reuse SearchBar for searching songs (NOT readOnly) */}
             <SearchBar
@@ -118,12 +122,17 @@ export default function Round() {
 
       {/* Prompt Modal */}
       {showPromptModal && (
-        <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal-content bg-gray-900 p-6 rounded-md text-center">
-            <h2 className="text-2xl font-bold mb-4">Current Prompt</h2>
-            <p className="text-xl italic mb-6">
-              {state.currentPrompt || "Loading..."}
-            </p>
+        <div className="prompt-modal fixed inset-0 flex items-center justify-center bg-black">
+          <div className="prompt-modal-content p-6 rounded-md text-center flex flex-col items-center gap-6">
+            <h1 className="text-7xl font-bold">The prompt is:</h1>
+
+            {/* Use SearchBar to display the prompt (readOnly) */}
+            <SearchBar
+              value={state.currentPrompt || "Loading..."}
+              onChange={() => {}}
+              readOnly
+            />
+
             <button
               onClick={() => setShowPromptModal(false)}
               className="green-btn py-2 px-4 rounded-md text-black font-semibold"
