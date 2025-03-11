@@ -1,7 +1,4 @@
 import React from 'react'
-import Song from '../../components/Song';
-
-
 
 export default function RoundWinner({songs}) {
     
@@ -13,6 +10,5 @@ export default function RoundWinner({songs}) {
             </div>
           ))}
         </div>
-      );
-      
-    };
+    );   
+};
