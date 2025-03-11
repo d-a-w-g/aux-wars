@@ -6,7 +6,7 @@ export default function SongRating() {
     <div className='page-title'>Delia Holman Page</div>
   )
 
-  /*
+  /* i dont even know if this works im still troubleshooting the rest of it lol
     const albumCover =
         track.album?.images?.[1]?.url ||
         track.album?.images?.[0]?.url ||
