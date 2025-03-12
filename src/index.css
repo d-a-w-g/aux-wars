@@ -12,7 +12,11 @@
     }
 }  
 
-.page-title {
+.page-title { /*remove after finishing song rating page*/
   font-size: 32px;
   color: white;
+}
+
+.records { /*change this, just trying to get it to show up atm*/
+  width: 500px;
 }
