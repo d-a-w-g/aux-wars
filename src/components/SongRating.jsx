@@ -7,6 +7,12 @@ export default function SongRating() {
         track.album?.images?.[0]?.url ||
         ""; 
 
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+
+    const handleClick = (index) => {
+        setSelectedIndex(index);
+    };
+
     return (
         <div className = "song-rate flex items-center">
 
@@ -26,12 +32,19 @@ export default function SongRating() {
             </div>
 
             {/*rating system*/}
-            <div className = "flex flex-col justify center">
-                <img>src ={record} alt = "rate this song 1 record" className = "records"</img>
-                <img>src ={record} alt = "rate this song 2 records" className = "records"</img>
-                <img>src ={record} alt = "rate this song 3 records" className = "records"</img>
-                <img>src ={record} alt = "rate this song 4 records" className = "records"</img>
-                <img>src ={record} alt = "rate this song 5 records" className = "records"</img>
+            <div className="flex flex-col justify-center items-center">
+                {[...Array(5)].map((_, index) => (
+                    <img
+                        key={index}
+                        src={record}
+                        alt={`rate this song ${index + 1} records`}
+                        className={`records transition-opacity duration-300 ${
+                            index <= selectedIndex ? "opacity-100" : "opacity-50"
+                        }`}
+                        /*records turn opaque when clicked*/
+                        onClick={() => handleClick(index)} 
+                    />
+                ))}
             </div>
 
             {/*submit button*/}
