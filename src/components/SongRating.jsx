@@ -1,11 +1,12 @@
 import React from 'react'
 import record from '../assets/record.svg'
+import { useState } from 'react';
 
-export default function SongRating() {
+export default function SongRating({ track }) {
     const albumCover =
         track.album?.images?.[1]?.url ||
         track.album?.images?.[0]?.url ||
-        ""; 
+        "";
 
     const [selectedIndex, setSelectedIndex] = useState(-1);
 
@@ -14,20 +15,21 @@ export default function SongRating() {
     };
 
     return (
-        <div className = "song-rate flex items-center">
+        <div className="song-rate flex items-center">
 
             {/*album cover image*/}
-            <img>
-                src = {albumCover}
-                alt = {track.name}
-                className = "album"
-            </img>
+            <img
+                src={albumCover}
+                alt={track.name}
+                className="album"
+            />
+
 
             {/*track name and artist name*/}
-            <div className = "flex flex-col justify-center">
+            <div className="flex flex-col justify-center">
                 <p className="font-semibold">{track.name}</p>
                 <p className="text-sm text-gray-300">
-                {track.artists.map((a) => a.name).join(", ")}
+                    {track.artists.map((a) => a.name).join(", ")}
                 </p>
             </div>
 
@@ -38,11 +40,10 @@ export default function SongRating() {
                         key={index}
                         src={record}
                         alt={`rate this song ${index + 1} records`}
-                        className={`records transition-opacity duration-300 ${
-                            index <= selectedIndex ? "opacity-100" : "opacity-50"
-                        }`}
+                        className={`records transition-opacity duration-300 ${index <= selectedIndex ? "opacity-100" : "opacity-50"
+                            }`}
                         /*records turn opaque when clicked*/
-                        onClick={() => handleClick(index)} 
+                        onClick={() => handleClick(index)}
                     />
                 ))}
             </div>
@@ -52,9 +53,7 @@ export default function SongRating() {
         </div>
     )
 
-    /* part that does? work
     return (
         <div className='page-title'>Delia Holman Page</div>
     )
-    */
 }
