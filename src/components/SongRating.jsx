@@ -15,7 +15,7 @@ export default function SongRating({ track }) {
     };
 
     return (
-        <div className="song-rate flex items-center">
+        <div className="song-rate flex flex-col items-center">
 
             {/*album cover image*/}
             <img
@@ -26,15 +26,15 @@ export default function SongRating({ track }) {
 
 
             {/*track name and artist name*/}
-            <div className="flex flex-col justify-center">
-                <p className="font-semibold">{track.name}</p>
-                <p className="text-sm text-gray-300">
+            <div className="flex flex-col justify-center items-center">
+                <p className="song-title font-semibold">{track.name}</p>
+                <p className="artist-name text-sm text-gray-300">
                     {track.artists.map((a) => a.name).join(", ")}
                 </p>
             </div>
 
             {/*rating system*/}
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-row justify-center items-center">
                 {[...Array(5)].map((_, index) => (
                     <img
                         key={index}
@@ -49,11 +49,8 @@ export default function SongRating({ track }) {
             </div>
 
             {/*submit button*/}
-            <button class="submit-button">Submit Rating</button>
-        </div>
-    )
+            <button class="submit-button">Submit</button>
 
-    return (
-        <div className='page-title'>Delia Holman Page</div>
+        </div>
     )
 }
