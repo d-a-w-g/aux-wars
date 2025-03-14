@@ -1,35 +1,61 @@
-import React from "react";
-import AnimatedLogo from "../../components/AnimatedLogo";
-import spotifyIcon from "../../assets/spotify-icon.svg";
-import HomeBtn from "../../components/HomeBtn";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { generateRandomString, generateCodeChallenge } from "../../services/spotifyAuth";
+import spotifyIcon from "../../assets/spotify-icon.svg";
+import AnimatedLogo from "../../components/AnimatedLogo";
+import HomeBtn from "../../components/HomeBtn";
+import {
+  generateRandomString,
+  generateCodeChallenge,
+} from "../../services/spotifyAuth";
+import { isTokenValid } from "../../services/spotifyApi";
 
 export default function Login() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Check token validity on mount
+    if (isTokenValid()) {
+      console.log("Access token is valid. Navigating to lobby...");
+      navigate("/lobby");
+    }
+  }, [navigate]);
+
   const handleLogin = async (loginType) => {
     if (loginType === "spotify") {
-      const existingAccessToken = localStorage.getItem("spotify_access_token");
-      if (existingAccessToken) {
-        console.log("Access token already exists. Navigating to lobby...");
+      // 1) If the token in localStorage is still valid, go to lobby immediately
+      if (isTokenValid()) {
+        console.log("Access token still valid. Navigating to lobby...");
         navigate("/lobby");
         return;
       }
 
+      // 2) If we reach here, token is missing or expired. Clear stale data.
+      localStorage.removeItem("spotify_access_token");
+      localStorage.removeItem("spotify_refresh_token");
+      localStorage.removeItem("spotify_token_expiry");
+
+      // 3) Proceed with the Spotify auth flow
       const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
       const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
       const scope = "user-read-private user-read-email";
 
       const codeVerifier = generateRandomString(128);
       localStorage.setItem("spotify_code_verifier", codeVerifier);
+
       const codeChallenge = await generateCodeChallenge(codeVerifier);
       const state = generateRandomString(16);
 
-      const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        redirectUri
-      )}&scope=${encodeURIComponent(scope)}&state=${state}&code_challenge_method=S256&code_challenge=${codeChallenge}`;
+      // Construct the Spotify login URL
+      const authUrl = `https://accounts.spotify.com/authorize
+?response_type=code
+&client_id=${clientId}
+&redirect_uri=${encodeURIComponent(redirectUri)}
+&scope=${encodeURIComponent(scope)}
+&state=${state}
+&code_challenge_method=S256
+&code_challenge=${codeChallenge}`;
 
+      // 4) Redirect user to Spotify's authorization page
       window.location.href = authUrl;
     } else if (loginType === "guest") {
       navigate("/lobby");

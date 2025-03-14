@@ -69,6 +69,11 @@ export default function Round() {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, navigate]);
 
+  // --- NEW: Callback to handle song selection and emit to the server ---
+  const handleSelectSong = (trackId) => {
+    socket.emit("song-selected", { trackId, gameCode });
+  };
+
   return (
     <div className="round-start flex flex-col items-center justify-center text-white p-4">
       {!isSongSelectionView ? (
@@ -107,12 +112,13 @@ export default function Round() {
             />
           </div>
 
-          <SongList tracks={searchResults} />
+          {/* --- UPDATED: Pass handleSelectSong as onSelectSong prop --- */}
+          <SongList tracks={searchResults} onSelectSong={handleSelectSong} />
 
           <div className="p-4">
             <button
               onClick={() => setShowPromptModal(true)}
-              className="green-btn w-full py-3 rounded-md text-black font-semibold"
+              className="green-btn w-full py-3 rounded-md text-black font-semibold cursor-pointer"
             >
               View Prompt
             </button>
@@ -135,7 +141,7 @@ export default function Round() {
 
             <button
               onClick={() => setShowPromptModal(false)}
-              className="green-btn py-2 px-4 rounded-md text-black font-semibold"
+              className="green-btn py-2 px-4 rounded-md text-black font-semibold cursor-pointer"
             >
               Close
             </button>

@@ -61,6 +61,7 @@ export default function SpotifyCallback() {
           localStorage.setItem("spotify_access_token", data.access_token);
           localStorage.setItem("spotify_refresh_token", data.refresh_token);
           localStorage.setItem("spotify_token_expiry", expiryTime);
+          console.log("Spotify token fetched successfully + expiry time:", data.expires_in);
           navigate("/lobby");
         }
       } catch (err) {
