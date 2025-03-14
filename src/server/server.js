@@ -21,8 +21,25 @@ const gameRooms = new Map();
 const defaultSettings = {
   numberOfRounds: 3,
   roundLength: 30, // in seconds
-  selectedPrompts: ["General", "Party", "Trivia", "Random", "Rock", "Pop", "Hip-Hop", "Jazz"],
+  selectedPrompts: [
+    "This song makes me feel like the main character.",
+    "The soundtrack to a late-night drive.",
+    "This song makes me wanna text my ex (or block them).",
+    "A song that defines high school memories.",
+    "The perfect song to play while getting ready to go out.",
+    "This song could start a mosh pit.",
+    "A song that instantly boosts your confidence.",
+    "This song would play in the background of my villain arc.",
+    "A song that could make me cry on the right day.",
+    "The ultimate cookout anthem.",
+    "A song that just feels like summertime.",
+    "This song is pure nostalgia.",
+    "A song that makes you feel unstoppable.",
+    "If life had a montage, this song would play in mine.",
+    "A song that instantly hypes up the whole room."
+  ],
 };
+
 
 const generateGameCode = () => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
