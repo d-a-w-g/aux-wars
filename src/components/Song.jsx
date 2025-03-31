@@ -7,7 +7,7 @@ export default function Song({ track, artist, albumCover, player, rating, winner
     return (
         <div className='song-container-winner'>
             <div className='album-cover'>
-                <img img src={recordLogo}  className='album-image-winner' alt="Album Cover"/>
+                <img img src={albumCover}  className='album-image-winner' alt="Album Cover"/>
             </div>
             <div>
                 <h3>{player}</h3>

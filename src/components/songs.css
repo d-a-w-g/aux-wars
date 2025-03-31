@@ -18,20 +18,38 @@
     padding: 15px;
     border-radius: 15px;
     font-size: 1.2em;
-    width: 100%; 
+    width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center; 
     text-align: center;
     line-height: 1.1; 
-    width: 300px;
+    margin: 0 auto;
 }
 
+/* Positioning the record image in the top-right corner */
 .song-container-winner .album-cover {
+    position: relative; 
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-bottom: 10px;
+}
+
+.song-container-winner .album-cover .record-image {
+    position: absolute;
+    top: -10px;   
+    right: -10px; 
+    width: 40px;  
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Album image style */
+.song-container-winner .album-image-winner {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
 }
 
 .song-container-winner .player-info {
@@ -61,12 +79,6 @@
     padding: 10px;
     border-radius: 10px;
     font-size: 1.2em;
-}
-
-.song-container-winner .album-image-winner {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
 }
 
 /* NOT WINNER */
@@ -118,5 +130,5 @@
 .song-container-winner div:last-child {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 5px; 
 }
