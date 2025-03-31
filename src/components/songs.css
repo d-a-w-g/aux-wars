@@ -1,7 +1,6 @@
 .song-container-not-winner, .song-container-winner {
     display: flex;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
     padding: 5px;
     margin: 5px 0;
@@ -14,11 +13,11 @@
 /* WINNER */
 .song-container-winner {
     position: relative;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.07);
     padding: 15px;
     border-radius: 15px;
     font-size: 1.2em;
-    width: 300px;
+    width: 240px;
     display: flex;
     flex-direction: column;
     align-items: center; 
@@ -27,7 +26,6 @@
     margin: 0 auto;
 }
 
-/* Positioning the record image in the top-right corner */
 .song-container-winner .album-cover {
     position: relative; 
     display: flex;
@@ -45,7 +43,6 @@
     border-radius: 50%;
 }
 
-/* Album image style */
 .song-container-winner .album-image-winner {
     width: 100px;
     height: 100px;
@@ -75,10 +72,11 @@
 
 .song-container-not-winner {
     position: relative;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.07);
     padding: 10px;
     border-radius: 10px;
     font-size: 1.2em;
+    margin-top:10px;
 }
 
 /* NOT WINNER */
