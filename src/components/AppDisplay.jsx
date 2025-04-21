@@ -8,6 +8,10 @@ export default function AppDisplay() {
     <div className="relative w-full h-screen overflow-hidden">
       <AlbumsDisplay albums={albums} />
       <div className="relative flex items-center justify-center h-full z-10">
+      <div className="absolute top-0 left-0 right-0 bottom-0 z-0">
+        <AlbumsDisplay albums={albums} />
+      </div>
+      <div className="relative flex items-center justify-center h-full">
         <Outlet />
       </div>
     </div>
