@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AppDisplay from "./components/AppDisplay";
 import Login from "./features/login/Login";
 import Landing from "./features/lobby/Landing";
+import SongRating from "./components/SongRating";
+import track from "./components/dummyData"
 import HowToPlay from "./features/how_to_play/HowToPlay";
 
 export default function App() {
@@ -13,6 +15,7 @@ export default function App() {
         <Route path="/" element={<AppDisplay />}>
           <Route index element={<Login />} />
           <Route path="/lobby" element={<Landing />} />
+          <Route path="/rating" element={<SongRating track={track} />} />
           <Route path="/how_to_play" element={<HowToPlay />} />
         </Route>
       </Routes>
