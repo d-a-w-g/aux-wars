@@ -1,0 +1,57 @@
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 90%; 
+    max-width: 500px; 
+    min-width: 300px; 
+    padding: 40px;
+    border-radius: 20px; 
+    margin-top: 15vh;
+    z-index: 20;
+}
+
+.login-with-spotify-button {
+    padding: 8px 15px;
+    background-color: #68d570;
+    color: #121212;
+    border: none;
+    border-radius: 80px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 60%;        
+    max-width: 300px;   
+    font-size: 18px;
+    margin-top: 20px;
+    z-index: inherit; 
+}
+
+.play-as-guest-button{
+    padding: 8px 15px;
+    background-color: white;
+    color: #121212;
+    border: none;
+    border-radius: 80px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 60%;        
+    max-width: 300px;  
+    font-size: 18px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    z-index: inherit;
+}
+
+.logo {
+    width: 500px;
+    margin-top: -200px;
+    margin-bottom: 50px; 
+}
+
+.text-to-play {
+    color: lightgray;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}

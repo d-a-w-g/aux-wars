@@ -154,3 +154,27 @@
   top: 0;
   color: white;
 }
+.records {
+  width: 50px;
+  margin: 10px;
+  margin-bottom: 50px;
+}
+
+.song-title {
+  font-size: 25px;
+  margin-top: 10px;
+  color: #ffffff;
+}
+
+.artist-name {
+  font-size: 15px;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.submit-button {
+  background-color: #ffffff;
+  width: 250px;
+  height: 50px;
+  border-radius: 40px;
+}
