@@ -14,6 +14,7 @@ export default function AnimatedLogo() {
 
   return (
     <motion.img
+      data-testid="animated-logo"
       className="landing-logo p-12"
       src={logo}
       alt="Aux Wars Logo"

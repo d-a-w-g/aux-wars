@@ -79,7 +79,7 @@ export default function Login() {
   ];
 
   return (
-    <div className="login h-screen flex flex-col justify-between py-6">
+    <div data-testid="login-page" className="login h-screen flex flex-col justify-between py-6">
       <div className="login-top flex flex-col items-center gap-10 my-10">
         <AnimatedLogo />
         <div className="login-btns flex flex-col items-center gap-10 w-full max-w-xs">
