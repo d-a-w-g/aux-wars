@@ -7,7 +7,7 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
   const albumCover =
     track.album?.images?.[1]?.url ||
     track.album?.images?.[0]?.url ||
-    "";
+    null;
 
   return (
     <motion.div
@@ -21,11 +21,13 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
     >
       {/* Song Info */}
       <div className="flex items-center gap-4 w-full">
-        <img
-          src={albumCover}
-          alt={track.name}
-          className="w-16 h-16 object-cover rounded-md"
-        />
+        {albumCover && (
+          <img
+            src={albumCover}
+            alt={track.name}
+            className="w-16 h-16 object-cover rounded-md"
+          />
+        )}
         <div className="flex flex-col justify-center flex-1">
           <p className="font-semibold">{track.name}</p>
           <p className="text-sm text-gray-300">

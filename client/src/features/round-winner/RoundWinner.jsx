@@ -7,7 +7,7 @@ export default function RoundWinner({songs}) {
     return (
       <div className="round-winner"> 
       <div className="top-bar">
-      <div className="prdisplayompt-">
+      <div className="prompt-display">
         <PromptDisplay />
         </div>
         <button className="next-button">Next</button>

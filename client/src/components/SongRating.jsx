@@ -6,7 +6,7 @@ export default function SongRating({ track }) {
     const albumCover =
         track.album?.images?.[1]?.url ||
         track.album?.images?.[0]?.url ||
-        "";
+        null;
 
     const [selectedIndex, setSelectedIndex] = useState(-1);
 
@@ -18,11 +18,13 @@ export default function SongRating({ track }) {
         <div className="song-rate flex flex-col items-center">
 
             {/*album cover image*/}
-            <img
-                src={albumCover}
-                alt={track.name}
-                className="album"
-            />
+            {albumCover && (
+                <img
+                    src={albumCover}
+                    alt={track.name}
+                    className="album"
+                />
+            )}
 
 
             {/*track name and artist name*/}
@@ -49,7 +51,7 @@ export default function SongRating({ track }) {
             </div>
 
             {/*submit button*/}
-            <button class="submit-button">Submit</button>
+            <button className="submit-button">Submit</button>
 
         </div>
     )

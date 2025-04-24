@@ -183,4 +183,39 @@ io.on("connection", (socket) => {
       }
     });
   });
+
+  socket.on("song-selected", (data) => {
+    const { gameCode, trackId } = data;
+    if (!gameRooms.has(gameCode)) return;
+    
+    const room = gameRooms.get(gameCode);
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    // Initialize selectedSongs if it doesn't exist
+    if (!room.selectedSongs) {
+      room.selectedSongs = new Map();
+    }
+
+    // Store the selected song for this player
+    room.selectedSongs.set(socket.id, trackId);
+    
+    // Notify all players in the room about the song selection
+    io.to(gameCode).emit("song-selected", { 
+      playerId: socket.id,
+      playerName: player.name,
+      trackId 
+    });
+
+    // Check if all players have selected a song
+    const allPlayersSelected = room.players.every(player => 
+      room.selectedSongs.has(player.id)
+    );
+
+    if (allPlayersSelected) {
+      // Move to the next phase (e.g., voting)
+      room.phase = "voting";
+      io.to(gameCode).emit("game-phase-updated", { phase: "voting" });
+    }
+  });
 });

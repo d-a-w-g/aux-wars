@@ -7,7 +7,7 @@ export default function Song({ track, artist, albumCover, player, rating, winner
     return (
         <div className='song-container-winner'>
             <div className='album-cover'>
-                <img img src={albumCover}  className='album-image-winner' alt="Album Cover"/>
+                <img src={albumCover} className='album-image-winner' alt="Album Cover"/>
             </div>
             <div>
                 <h3>{player}</h3>
@@ -15,7 +15,7 @@ export default function Song({ track, artist, albumCover, player, rating, winner
                 <p>{artist}</p>
             </div>
             <div className='record-rating'>
-                <img img src={recordLogo} className='record-image-winner'  alt="Record Logo"/>
+                <img src={recordLogo} className='record-image-winner' alt="Record Logo"/>
                 <h5>x {rating}</h5>
             </div>
         </div>
@@ -24,7 +24,7 @@ export default function Song({ track, artist, albumCover, player, rating, winner
         return(
             <div className='song-container-not-winner'>
                 <div className='album-cover'>
-                    <img img src={albumCover}  className='album-image-not-winner' alt="Album Cover"/>
+                    <img src={albumCover} className='album-image-not-winner' alt="Album Cover"/>
                 </div>
                 <div>
                     <h3>{player}</h3>
@@ -33,7 +33,7 @@ export default function Song({ track, artist, albumCover, player, rating, winner
                 </div>
                 <div>
                     <h5>{rating}</h5>
-                    <img img src={recordLogo} className='record-image-not-winner' alt="Record Logo"/>
+                    <img src={recordLogo} className='record-image-not-winner' alt="Record Logo"/>
                 </div>
             </div>
         );
