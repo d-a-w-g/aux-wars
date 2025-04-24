@@ -3,11 +3,11 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 
-const app = express();
+export const app = express();
 app.use(cors());
 
-const server = http.createServer(app);
-const io = new Server(server, {
+export const server = http.createServer(app);
+export const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
@@ -16,7 +16,7 @@ const io = new Server(server, {
 
 // In-memory storage for game rooms.
 // Each room is an object with players, settings, phase, and a currentPrompt.
-const gameRooms = new Map();
+export const gameRooms = new Map();
 
 const defaultSettings = {
   numberOfRounds: 3,
@@ -183,8 +183,4 @@ io.on("connection", (socket) => {
       }
     });
   });
-});
-
-server.listen(3001, () => {
-  console.log("Server running on port 3001");
 });
