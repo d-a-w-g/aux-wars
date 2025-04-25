@@ -38,47 +38,93 @@ describe('Song Selection Tests', () => {
     clientSocket1.close()
   })
 
-  // Test individual song selection by a player
-  it("should handle song selection from a player", (done) => {
+  // Test player ID in song selection
+  it("should include correct player ID in song selection", (done) => {
     const trackId = "test-track-1"
     
-    // Listen for song selection event
     clientSocket2.on("song-selected", (data) => {
       expect(data.playerId).toBe(clientSocket2.id)
+      clientSocket2.off("song-selected")
+      done()
+    })
+
+    clientSocket2.emit("song-selected", { gameCode, trackId })
+  })
+
+  // Test track ID in song selection
+  it("should include correct track ID in song selection", (done) => {
+    const trackId = "test-track-1"
+    
+    clientSocket2.on("song-selected", (data) => {
       expect(data.trackId).toBe(trackId)
       clientSocket2.off("song-selected")
       done()
     })
 
-    // Second player selects a song
     clientSocket2.emit("song-selected", { gameCode, trackId })
   })
 
-  // Test multiple players selecting songs and game phase transition
-  it("should track selected songs in the game room", (done) => {
+  // Test first player's song selection
+  it("should track first player's selected song", (done) => {
     const trackId1 = "test-track-1"
     const trackId2 = "test-track-2"
     let phaseChangeReceived = false
     
-    // Listen for phase change when all players have selected songs
     clientSocket1.on("game-phase-updated", ({ phase }) => {
       if (phase === "voting" && !phaseChangeReceived) {
         phaseChangeReceived = true
         const room = gameRooms.get(gameCode)
         expect(room.selectedSongs.get(clientSocket1.id)).toBe(trackId1)
+        clientSocket1.off("game-phase-updated")
+        done()
+      }
+    })
+
+    clientSocket1.emit("song-selected", { gameCode, trackId: trackId1 })
+    clientSocket2.emit("song-selected", { gameCode, trackId: trackId2 })
+  })
+
+  // Test second player's song selection
+  it("should track second player's selected song", (done) => {
+    const trackId1 = "test-track-1"
+    const trackId2 = "test-track-2"
+    let phaseChangeReceived = false
+    
+    clientSocket1.on("game-phase-updated", ({ phase }) => {
+      if (phase === "voting" && !phaseChangeReceived) {
+        phaseChangeReceived = true
+        const room = gameRooms.get(gameCode)
         expect(room.selectedSongs.get(clientSocket2.id)).toBe(trackId2)
+        clientSocket1.off("game-phase-updated")
+        done()
+      }
+    })
+
+    clientSocket1.emit("song-selected", { gameCode, trackId: trackId1 })
+    clientSocket2.emit("song-selected", { gameCode, trackId: trackId2 })
+  })
+
+  // Test phase transition after song selection
+  it("should transition to voting phase after all players select songs", (done) => {
+    const trackId1 = "test-track-1"
+    const trackId2 = "test-track-2"
+    let phaseChangeReceived = false
+    
+    clientSocket1.on("game-phase-updated", ({ phase }) => {
+      if (phase === "voting" && !phaseChangeReceived) {
+        phaseChangeReceived = true
+        const room = gameRooms.get(gameCode)
         expect(room.phase).toBe("voting")
         clientSocket1.off("game-phase-updated")
         done()
       }
     })
 
-    // Both players select songs
     clientSocket1.emit("song-selected", { gameCode, trackId: trackId1 })
     clientSocket2.emit("song-selected", { gameCode, trackId: trackId2 })
   })
 
-  // Test security: prevent non-players from selecting songs
+  // Test unauthorized song selection
   it("should not allow song selection from non-players", (done) => {
     const trackId = "test-track-1"
     const nonPlayerSocket = new Client(`http://localhost:${port}`)
@@ -86,7 +132,6 @@ describe('Song Selection Tests', () => {
     nonPlayerSocket.on("connect", () => {
       nonPlayerSocket.emit("song-selected", { gameCode, trackId })
       
-      // The room should not have the song selection
       const room = gameRooms.get(gameCode)
       expect(room.selectedSongs?.get(nonPlayerSocket.id)).toBeUndefined()
       

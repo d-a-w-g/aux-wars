@@ -24,11 +24,25 @@ describe('Server Tests', () => {
     clientSocket.close()
   })
 
-  // Test game creation functionality
-  it("lets a host create a game code", (done) => {
-    clientSocket.emit("host-game", ({ success, gameCode }) => {
+  // Test game creation success
+  it("successfully creates a game", (done) => {
+    clientSocket.emit("host-game", ({ success }) => {
       expect(success).toBe(true)
+      done()
+    })
+  })
+
+  // Test game code format
+  it("generates a valid game code", (done) => {
+    clientSocket.emit("host-game", ({ gameCode }) => {
       expect(typeof gameCode).toBe("string")
+      done()
+    })
+  })
+
+  // Test game code length
+  it("generates a game code of correct length", (done) => {
+    clientSocket.emit("host-game", ({ gameCode }) => {
       expect(gameCode).toHaveLength(6)
       done()
     })

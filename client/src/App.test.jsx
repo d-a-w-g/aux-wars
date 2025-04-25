@@ -64,6 +64,12 @@ describe('App', () => {
       customRender(<App />);
       const logo = screen.getByTestId('animated-logo');
       expect(logo).toBeInTheDocument();
+    });
+
+    // Test logo alt text
+    it('has correct alt text for the logo', () => {
+      customRender(<App />);
+      const logo = screen.getByTestId('animated-logo');
       expect(logo).toHaveAttribute('alt', 'Aux Wars Logo');
     });
 

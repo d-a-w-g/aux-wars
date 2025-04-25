@@ -22,18 +22,29 @@ describe('SongRating', () => {
     render(<SongRating track={mockTrack} />);
   });
 
-  // Test song information display
-  it('displays the song title and artist names', () => {
+  // Test song title display
+  it('displays the song title', () => {
     render(<SongRating track={mockTrack} />);
     expect(screen.getByText('Test Song')).toBeInTheDocument();
+  });
+
+  // Test artist names display
+  it('displays the artist names', () => {
+    render(<SongRating track={mockTrack} />);
     expect(screen.getByText('Test Artist 1, Test Artist 2')).toBeInTheDocument();
   });
 
-  // Test album cover display
+  // Test album cover presence
   it('displays the album cover', () => {
     render(<SongRating track={mockTrack} />);
     const albumCover = screen.getByAltText('Test Song');
     expect(albumCover).toBeInTheDocument();
+  });
+
+  // Test album cover source
+  it('uses the correct album cover image', () => {
+    render(<SongRating track={mockTrack} />);
+    const albumCover = screen.getByAltText('Test Song');
     expect(albumCover).toHaveAttribute('src', 'http://test.com/medium.jpg');
   });
 
@@ -44,39 +55,76 @@ describe('SongRating', () => {
     expect(records).toHaveLength(5);
   });
 
-  // Test rating interaction and visual feedback
-  it('updates opacity when a record is clicked', () => {
+  // Test first record opacity after click
+  it('updates first record opacity when clicked', () => {
     render(<SongRating track={mockTrack} />);
     const records = screen.getAllByAltText(/rate this song \d+ records/);
-    
-    // Click the third record
     fireEvent.click(records[2]);
-    
-    // First three records should be fully opaque
     expect(records[0]).toHaveClass('opacity-100');
+  });
+
+  // Test second record opacity after click
+  it('updates second record opacity when clicked', () => {
+    render(<SongRating track={mockTrack} />);
+    const records = screen.getAllByAltText(/rate this song \d+ records/);
+    fireEvent.click(records[2]);
     expect(records[1]).toHaveClass('opacity-100');
+  });
+
+  // Test third record opacity after click
+  it('updates third record opacity when clicked', () => {
+    render(<SongRating track={mockTrack} />);
+    const records = screen.getAllByAltText(/rate this song \d+ records/);
+    fireEvent.click(records[2]);
     expect(records[2]).toHaveClass('opacity-100');
-    
-    // Last two records should be semi-transparent
+  });
+
+  // Test fourth record opacity after click
+  it('updates fourth record opacity when clicked', () => {
+    render(<SongRating track={mockTrack} />);
+    const records = screen.getAllByAltText(/rate this song \d+ records/);
+    fireEvent.click(records[2]);
     expect(records[3]).toHaveClass('opacity-50');
+  });
+
+  // Test fifth record opacity after click
+  it('updates fifth record opacity when clicked', () => {
+    render(<SongRating track={mockTrack} />);
+    const records = screen.getAllByAltText(/rate this song \d+ records/);
+    fireEvent.click(records[2]);
     expect(records[4]).toHaveClass('opacity-50');
   });
 
-  // Test error handling for missing album images
-  it('handles missing album images gracefully', () => {
+  // Test song title display with missing images
+  it('displays song title when album images are missing', () => {
     const trackWithoutImages = {
       name: 'No Image Song',
       artists: [{ name: 'No Image Artist' }],
       album: { images: [] }
     };
-    
     render(<SongRating track={trackWithoutImages} />);
-    
-    // Verify the song title and artist are still displayed
     expect(screen.getByText('No Image Song')).toBeInTheDocument();
+  });
+
+  // Test artist name display with missing images
+  it('displays artist name when album images are missing', () => {
+    const trackWithoutImages = {
+      name: 'No Image Song',
+      artists: [{ name: 'No Image Artist' }],
+      album: { images: [] }
+    };
+    render(<SongRating track={trackWithoutImages} />);
     expect(screen.getByText('No Image Artist')).toBeInTheDocument();
-    
-    // Verify no image is rendered
+  });
+
+  // Test no album images are rendered when missing
+  it('does not render album images when they are missing', () => {
+    const trackWithoutImages = {
+      name: 'No Image Song',
+      artists: [{ name: 'No Image Artist' }],
+      album: { images: [] }
+    };
+    render(<SongRating track={trackWithoutImages} />);
     const images = screen.queryAllByRole('img');
     const albumImages = images.filter(img => img.alt === 'No Image Song');
     expect(albumImages).toHaveLength(0);

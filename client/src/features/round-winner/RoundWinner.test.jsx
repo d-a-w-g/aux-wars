@@ -33,10 +33,15 @@ describe('RoundWinner', () => {
     render(<RoundWinner songs={mockSongs} />);
   });
 
-  // Test song list display
-  it('displays all songs passed as props', () => {
+  // Test first song display
+  it('displays the first song', () => {
     render(<RoundWinner songs={mockSongs} />);
     expect(screen.getByText('Test Track 1')).toBeInTheDocument();
+  });
+
+  // Test second song display
+  it('displays the second song', () => {
+    render(<RoundWinner songs={mockSongs} />);
     expect(screen.getByText('Test Track 2')).toBeInTheDocument();
   });
 

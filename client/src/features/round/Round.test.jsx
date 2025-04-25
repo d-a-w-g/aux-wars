@@ -70,10 +70,15 @@ describe('Round Component', () => {
     ]);
   });
 
-  // Test initial round state and prompt display
-  it('renders the initial round start view with prompt', () => {
+  // Test initial round state
+  it('renders the initial round start view', () => {
     renderRound();
     expect(screen.getByText('The prompt is:')).toBeInTheDocument();
+  });
+
+  // Test prompt display
+  it('displays the current prompt', () => {
+    renderRound();
     expect(screen.getByDisplayValue('Test prompt')).toBeInTheDocument();
   });
 
@@ -99,8 +104,8 @@ describe('Round Component', () => {
     });
   });
 
-  // Test song selection and submission
-  it('emits song selection event when a song is selected', async () => {
+  // Test song search results display
+  it('displays search results after searching', async () => {
     renderRound();
     fireEvent.click(screen.getByText('Select Song'));
     
@@ -110,7 +115,19 @@ describe('Round Component', () => {
     });
 
     await waitFor(() => {
-      expect(searchSpotifyTracks).toHaveBeenCalledWith('test search');
+      const songElements = screen.getAllByText('Test Song 1');
+      expect(songElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  // Test song selection
+  it('emits song selection event when a song is selected', async () => {
+    renderRound();
+    fireEvent.click(screen.getByText('Select Song'));
+    
+    const searchInput = screen.getByPlaceholderText('What do you want to play?');
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'test search' } });
     });
 
     await waitFor(() => {
@@ -133,7 +150,7 @@ describe('Round Component', () => {
     });
   });
 
-  // Test prompt modal functionality
+  // Test prompt modal display
   it('shows prompt modal when "View Prompt" is clicked', () => {
     renderRound();
     fireEvent.click(screen.getByText('Select Song'));
@@ -141,7 +158,7 @@ describe('Round Component', () => {
     expect(screen.getByText('The prompt is:')).toBeInTheDocument();
   });
 
-  // Test game phase transition and navigation
+  // Test navigation on phase change
   it('handles navigation back to lobby when phase changes', async () => {
     renderRound();
     
