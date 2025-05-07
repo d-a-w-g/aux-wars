@@ -5,7 +5,7 @@ import nextIcon from "../../assets/next-icon.svg";
 export default function RoundStart({ currentPrompt, onStartSelection }) {
   return (
     <div className="flex flex-col items-center gap-10">
-      <h1 className="text-7xl font-bold">The prompt is:</h1>
+      <h1 className="text-7xl font-bold text-center">The prompt is:</h1>
 
       <SearchBar
         value={currentPrompt || ""}

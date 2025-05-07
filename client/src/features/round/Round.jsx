@@ -53,21 +53,20 @@ export default function Round() {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    socket.on("prompt-updated", ({ prompt }) => {
+    const handlePromptUpdate = ({ prompt }) => {
+      console.log("Received prompt update:", prompt);
       dispatch({ type: "SET_PROMPT", payload: prompt });
-    });
+    };
+
+    socket.on("prompt-updated", handlePromptUpdate);
+
+    // Request the current prompt when component mounts
+    socket.emit("request-prompt", { gameCode });
 
     return () => {
-      socket.off("prompt-updated");
+      socket.off("prompt-updated", handlePromptUpdate);
     };
-  }, [socket, isConnected, dispatch]);
-
-  // If we have no prompt, request it from the server
-  useEffect(() => {
-    if (socket && isConnected && !state.currentPrompt) {
-      socket.emit("request-prompt", { gameCode });
-    }
-  }, [socket, isConnected, state.currentPrompt, gameCode]);
+  }, [socket, isConnected, dispatch, gameCode]);
 
   // Listen for song submission updates
   useEffect(() => {
@@ -182,13 +181,16 @@ export default function Round() {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    socket.on("game-phase-updated", ({ phase }) => {
+    socket.on("game-phase-updated", ({ phase, currentRound }) => {
       // Signal we're handling a transition
       setIsTransitioning(true);
       setGameTransition(true);
       
       console.log(`Phase changed to: ${phase}`);
       dispatch({ type: "SET_PHASE", payload: phase });
+      if (typeof currentRound !== 'undefined') {
+        dispatch({ type: "SET_CURRENT_ROUND", payload: currentRound });
+      }
       
       if (phase === "lobby") {
         // Only navigate to lobby if we're not in a game
@@ -286,7 +288,8 @@ export default function Round() {
       album: track.album?.name || 'Unknown Album',
       albumCover: track.album?.images?.[0]?.url || '',
       previewUrl: track.preview_url || '',
-      spotifyUrl: track.external_urls?.spotify || ''
+      spotifyUrl: track.external_urls?.spotify || '',
+      uri: track.uri
     };
     
     // Send both track ID and details to the server

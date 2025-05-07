@@ -83,3 +83,94 @@ export async function searchSpotifyTracks(query) {
   }
   return [];
 }
+
+// --- Spotify Web Playback SDK Loader and Player Manager ---
+let spotifyPlayer = null;
+let playerReadyPromise = null;
+
+export function loadSpotifySDK() {
+  // Only load once
+  if (window.Spotify) return Promise.resolve();
+  if (document.getElementById('spotify-sdk')) return playerReadyPromise;
+
+  // Set the global callback BEFORE loading the script
+  if (!window.onSpotifyWebPlaybackSDKReady) {
+    window.onSpotifyWebPlaybackSDKReady = () => {};
+  }
+
+  playerReadyPromise = new Promise((resolve) => {
+    window.onSpotifyWebPlaybackSDKReady = resolve;
+    const script = document.createElement('script');
+    script.id = 'spotify-sdk';
+    script.src = 'https://sdk.scdn.co/spotify-player.js';
+    document.body.appendChild(script);
+  });
+  return playerReadyPromise;
+}
+
+export async function initializeSpotifyPlayer(name = 'Aux Wars Player') {
+  await loadSpotifySDK();
+  if (spotifyPlayer) return spotifyPlayer;
+  const token = localStorage.getItem('spotify_access_token');
+  if (!token) throw new Error('No Spotify access token');
+  return new Promise((resolve, reject) => {
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      spotifyPlayer = new window.Spotify.Player({
+        name,
+        getOAuthToken: cb => cb(token),
+        volume: 0.7,
+      });
+      spotifyPlayer.addListener('ready', ({ device_id }) => {
+        resolve({ player: spotifyPlayer, deviceId: device_id });
+      });
+      spotifyPlayer.addListener('not_ready', () => {
+        // Optionally handle not ready
+      });
+      spotifyPlayer.addListener('initialization_error', ({ message }) => {
+        reject(new Error(message));
+      });
+      spotifyPlayer.addListener('authentication_error', ({ message }) => {
+        reject(new Error(message));
+      });
+      spotifyPlayer.addListener('account_error', ({ message }) => {
+        reject(new Error(message));
+      });
+      spotifyPlayer.connect();
+    };
+  });
+}
+
+export function getSpotifyPlayer() {
+  return spotifyPlayer;
+}
+
+export async function playSpotifyTrack(trackUri, deviceId) {
+  const token = localStorage.getItem('spotify_access_token');
+  if (!token) throw new Error('No Spotify access token');
+  const res = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ uris: [trackUri] }),
+  });
+  if (!res.ok) throw new Error('Failed to play track');
+}
+
+export async function pauseSpotifyPlayback(deviceId) {
+  const token = localStorage.getItem('spotify_access_token');
+  if (!token) throw new Error('No Spotify access token');
+  const res = await fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to pause playback');
+}
+
+export function getSpotifyPlaybackState() {
+  if (!spotifyPlayer) return null;
+  return spotifyPlayer.getCurrentState();
+}

@@ -128,10 +128,11 @@ io.on("connection", (socket) => {
     
     // Emit updates
     io.to(gameCode).emit("update-players", room.players);
-    io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
+    io.to(gameCode).emit("game-phase-updated", { phase: room.phase, currentRound: room.currentRound });
     
+    // If there's a current prompt, send it to all players
     if (room.currentPrompt) {
-      socket.emit("prompt-updated", { prompt: room.currentPrompt });
+      io.to(gameCode).emit("prompt-updated", { prompt: room.currentPrompt });
     }
     
     console.log(`${socket.id} joined game ${gameCode}`);
@@ -169,16 +170,13 @@ io.on("connection", (socket) => {
       const chosenPrompt = prompts[Math.floor(Math.random() * prompts.length)];
       room.currentPrompt = chosenPrompt;
         room.phase = "songSelection";
-        
+        room.currentRound = 1; // Ensure first round is always 1
         // First update the phase so clients know what's coming
-        io.to(gameCode).emit("game-phase-updated", { phase: room.phase });
-        
+        io.to(gameCode).emit("game-phase-updated", { phase: room.phase, currentRound: room.currentRound });
         // Then send the prompt details
       io.to(gameCode).emit("prompt-updated", { prompt: chosenPrompt });
-        
         // Finally emit the game-started event with the prompt
       io.to(gameCode).emit("game-started", { prompt: chosenPrompt });
-        
       console.log(`Game started in room ${gameCode} with prompt: ${chosenPrompt}`);
       } catch (error) {
         console.error("Error starting game:", error);
@@ -342,7 +340,7 @@ io.on("connection", (socket) => {
       // First update phase to rating if not already
       if (room.phase !== "rating") {
         room.phase = "rating";
-        io.to(gameCode).emit("game-phase-updated", { phase: "rating" });
+        io.to(gameCode).emit("game-phase-updated", { phase: "rating", currentRound: room.currentRound });
       }
       
       // Then emit event to all clients to start rating this song after a short delay
@@ -430,30 +428,28 @@ io.on("connection", (socket) => {
     try {
       // First update phase to results
       room.phase = "results";
-      io.to(gameCode).emit("game-phase-updated", { phase: "results" });
+      io.to(gameCode).emit("game-phase-updated", { phase: "results", currentRound: room.currentRound });
       
-      // Calculate average rating for each song
+      // Calculate total records for each song
       const songScores = {};
       
       // Log ratings data
       console.log("Song ratings:", JSON.stringify(room.songRatings, null, 2));
       
       for (const [songId, ratings] of Object.entries(room.songRatings)) {
-        // Calculate average rating (ignore -1 ratings which are skips)
+        // Calculate total records (sum of all ratings, ignoring -1 ratings which are skips)
         const validRatings = ratings.filter(r => r.rating > 0);
-        const totalRating = validRatings.reduce((sum, r) => sum + r.rating, 0);
-        const averageRating = validRatings.length > 0 ? totalRating / validRatings.length : 0;
+        const totalRecords = validRatings.reduce((sum, r) => sum + r.rating, 0);
         
         // Find the song details
         const songDetails = room.songsToRate.find(s => s.songId === songId);
         
-        console.log(`Processing song ${songId}: valid ratings: ${validRatings.length}, average: ${averageRating}`);
+        console.log(`Processing song ${songId}: valid ratings: ${validRatings.length}, total records: ${totalRecords}`);
         
         if (songDetails) {
           songScores[songId] = {
             ...songDetails,
-            averageRating: averageRating,
-            totalRating: totalRating,
+            totalRecords: totalRecords,
             ratings: validRatings
           };
         } else {
@@ -461,9 +457,9 @@ io.on("connection", (socket) => {
         }
       }
       
-      // Sort songs by average rating to determine winner
+      // Sort songs by total records to determine winner
       const sortedSongs = Object.values(songScores).sort(
-        (a, b) => b.averageRating - a.averageRating
+        (a, b) => b.totalRecords - a.totalRecords
       );
       
       console.log(`Sorted ${sortedSongs.length} songs for results`);
@@ -471,7 +467,7 @@ io.on("connection", (socket) => {
       // Mark the winner
       if (sortedSongs.length > 0) {
         sortedSongs[0].isWinner = true;
-        console.log(`Winner is: ${sortedSongs[0].name} by ${sortedSongs[0].artist} with rating ${sortedSongs[0].averageRating}`);
+        console.log(`Winner is: ${sortedSongs[0].name} by ${sortedSongs[0].artist} with ${sortedSongs[0].totalRecords} records`);
       } else {
         console.warn("No songs to display in results!");
       }
@@ -514,7 +510,7 @@ io.on("connection", (socket) => {
         room.phase = "gameOver";
         
         // Emit phase change
-        io.to(gameCode).emit("game-phase-updated", { phase: "gameOver" });
+        io.to(gameCode).emit("game-phase-updated", { phase: "gameOver", currentRound: room.currentRound });
         
         console.log(`Game ${gameCode} is over after ${room.currentRound} rounds`);
       } else {
@@ -532,17 +528,15 @@ io.on("connection", (socket) => {
         room.phase = "songSelection";
         
         // Emit phase change first
-        io.to(gameCode).emit("game-phase-updated", { phase: "songSelection" });
+        io.to(gameCode).emit("game-phase-updated", { phase: "songSelection", currentRound: room.currentRound });
         
         // Choose a new prompt
         const prompts = room.settings.selectedPrompts;
         const chosenPrompt = prompts[Math.floor(Math.random() * prompts.length)];
         room.currentPrompt = chosenPrompt;
         
-        // Emit new prompt after a short delay
-        setTimeout(() => {
-          io.to(gameCode).emit("prompt-updated", { prompt: chosenPrompt });
-        }, 500);
+        // Emit new prompt immediately
+        io.to(gameCode).emit("prompt-updated", { prompt: chosenPrompt });
         
         console.log(`Starting round ${room.currentRound} in game ${gameCode} with prompt: ${chosenPrompt}`);
       }
@@ -573,7 +567,7 @@ io.on("connection", (socket) => {
       const players = room.players;
       
       // Emit phase change to redirect clients
-      io.to(gameCode).emit("game-phase-updated", { phase: "lobby" });
+      io.to(gameCode).emit("game-phase-updated", { phase: "lobby", currentRound: room.currentRound });
       
       console.log(`Game ${gameCode} returned to lobby`);
     } catch (error) {
@@ -643,7 +637,7 @@ function checkGameViability(gameCode, room) {
     
     // Notify all players
     io.to(gameCode).emit("game-error", { message: "Not enough players to continue the game" });
-    io.to(gameCode).emit("game-phase-updated", { phase: "lobby" });
+    io.to(gameCode).emit("game-phase-updated", { phase: "lobby", currentRound: room.currentRound });
     
     return false;
   }

@@ -145,7 +145,9 @@
 }
 
 .search-bar {
-  width: 356px;
+  width: 100%;
+  max-width: 600px;
+  min-width: 356px;
   height: 56px;
   background-color: #242424;
   opacity: .85;

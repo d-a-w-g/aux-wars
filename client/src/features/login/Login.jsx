@@ -37,7 +37,7 @@ export default function Login() {
       // 3) Proceed with the Spotify auth flow
       const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
       const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-      const scope = "user-read-private user-read-email";
+      const scope = "streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state";
 
       const codeVerifier = generateRandomString(128);
       localStorage.setItem("spotify_code_verifier", codeVerifier);
