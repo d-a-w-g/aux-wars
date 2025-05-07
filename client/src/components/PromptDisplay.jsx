@@ -1,7 +1,7 @@
 import React from "react";
 import searchIcon from "../assets/search-icon.svg";
 
-export default function PromptDisplay({ text = "Prompt Here" }) {
+export default function PromptDisplay({ prompt = "Prompt Here" }) {
   return (
     <div className="search-area flex justify-center">
       <div
@@ -18,7 +18,7 @@ export default function PromptDisplay({ text = "Prompt Here" }) {
         }}
       >
         <img src={searchIcon} alt="Search Icon" className="w-5 flex-shrink-0" />
-        <span className="text-white">{text}</span>
+        <span className="text-white">{prompt}</span>
       </div>
     </div>
   );

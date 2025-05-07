@@ -1,20 +1,26 @@
-import React, { useState } from "react";
-import SongItem from "./SongItem";
+import React from 'react';
+import SongItem from './SongItem';
 
-export default function SongList({ tracks, onSelectSong }) {
-  const [selectedTrackId, setSelectedTrackId] = useState(null);
-
+const SongList = ({ tracks, selectedTrack, onSelectTrack, onConfirmTrack }) => {
   return (
-    <div className="results-container flex-1 overflow-y-auto px-4">
-      {tracks.map((track) => (
+    <div className="song-list flex-1 overflow-y-auto px-4">
+      {tracks && tracks.length > 0 ? (
+        tracks.map((track) => (
         <SongItem
           key={track.id}
           track={track}
-          selected={track.id === selectedTrackId}
-          onSelect={setSelectedTrackId}
-          onSelectSong={onSelectSong}
+            selected={selectedTrack && selectedTrack.id === track.id}
+            onSelect={() => onSelectTrack(track)}
+            onSelectSong={() => onConfirmTrack(track)}
         />
-      ))}
+        ))
+      ) : (
+        <div className="text-center text-gray-200 py-4">
+          No songs found. Try searching for something else.
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default SongList;

@@ -17,7 +17,7 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
       className={`song-item flex items-center justify-between p-3 mb-3 rounded-md h-auto ${
         selected ? "bg-gray-800" : "cursor-pointer"
       }`}
-      onClick={() => onSelect(track.id)}
+      onClick={() => onSelect(track)}
     >
       {/* Song Info */}
       <div className="flex items-center gap-4 w-full">
@@ -32,6 +32,9 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
           <p className="font-semibold">{track.name}</p>
           <p className="text-sm text-gray-300">
             {track.artists.map((a) => a.name).join(", ")}
+          </p>
+          <p className="text-xs text-gray-400">
+            {track.album?.name}
           </p>
         </div>
 

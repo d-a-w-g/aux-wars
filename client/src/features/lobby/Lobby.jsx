@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSocket } from "../../services/SocketProvider";
+import { useSocket, useSocketConnection } from "../../services/SocketProvider";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import PlayerList from "../../components/PlayerList";
@@ -21,48 +21,49 @@ export default function Lobby() {
   const [animateInput, setAnimateInput] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const allPlayersReady = players.every((player) => player.isReady);
+  const isConnected = useSocketConnection();
 
   useEffect(() => {
     if (!socket) {
       navigate("/lobby");
       return;
     }
+
+    // Create a function to handle the join game logic
+    const joinGame = (code) => {
+      socket.emit("join-game", { gameCode: code, name }, (response) => {
+        if (!response.success) {
+          console.error("Join failed:", response.message);
+          navigate("/lobby");
+        }
+      });
+    };
+
     if (!routeGameCode) {
+      // Host new game
       socket.emit("host-game", (response) => {
         if (response.success) {
           setGameCode(response.gameCode);
-          socket.emit(
-            "join-game",
-            { gameCode: response.gameCode, name },
-            (res) => {
-              if (!res.success) {
-                console.error("Join failed:", res.message);
-                navigate("/lobby");
-              }
-            }
-          );
+          joinGame(response.gameCode);
         } else {
           console.error("Failed to host game");
           navigate("/lobby");
         }
       });
     } else {
+      // Join existing game
       setGameCode(routeGameCode);
-      socket.emit(
-        "join-game",
-        { gameCode: routeGameCode, name },
-        (response) => {
-          console.log("join-game callback response", response);
-          if (!response.success) {
-            console.error("Join failed:", response.message);
-            navigate("/lobby");
-          }
-        }
-      );
+      joinGame(routeGameCode);
     }
+
+    // Set up event listener for player updates
     socket.on("update-players", (updatedPlayers) => setPlayers(updatedPlayers));
-    return () => socket.off("update-players");
-  }, [socket, routeGameCode, navigate]);
+
+    // Cleanup function to remove event listeners
+    return () => {
+      socket.off("update-players");
+    };
+  }, [socket, routeGameCode, navigate, name]);
 
   useEffect(() => {
     const currentPlayer = players.find((player) => player.id === socket?.id);
@@ -138,6 +139,57 @@ export default function Lobby() {
     }
     setIsReady((prev) => !prev);
     socket.emit("update-player-name", { gameCode, name, isReady: !isReady });
+  };
+
+  // Add a function to handle starting the game
+  const handleStartGame = () => {
+    console.log("Attempting to start game...");
+    console.log("Socket connection state:", { 
+      socket: !!socket, 
+      isConnected, 
+      isHost, 
+      allPlayersReady,
+      playerCount: players.length 
+    });
+
+    if (!socket) {
+      console.error("No socket instance available");
+      return;
+    }
+
+    if (!isConnected) {
+      console.error("Socket not connected, attempting to reconnect...");
+      // Try to reconnect the socket
+      socket.connect();
+      // Wait a moment for the connection to establish
+      setTimeout(() => {
+        if (socket.connected) {
+          console.log("Socket reconnected, starting game...");
+          socket.emit("start-game", { gameCode });
+        } else {
+          console.error("Failed to reconnect socket");
+        }
+      }, 1000);
+      return;
+    }
+
+    if (!isHost) {
+      console.error("Only host can start the game");
+      return;
+    }
+
+    if (!allPlayersReady) {
+      console.error("Not all players are ready");
+      return;
+    }
+
+    if (players.length < 3) {
+      console.error("Need at least 3 players to start");
+      return;
+    }
+
+    console.log("Starting game...");
+    socket.emit("start-game", { gameCode });
   };
 
   return (
@@ -220,9 +272,7 @@ export default function Lobby() {
           {isHost && allPlayersReady && players.length > 2 && (
             <button
               className="green-btn fixed bottom-0 w-full text-black py-3 text-center"
-              onClick={() => {
-                socket.emit("start-game", { gameCode });
-              }}
+              onClick={handleStartGame}
             >
               Start Game
             </button>
