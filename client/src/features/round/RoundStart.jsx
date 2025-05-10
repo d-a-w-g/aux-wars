@@ -2,10 +2,18 @@ import React from "react";
 import SearchBar from "../../components/SearchBar";
 import nextIcon from "../../assets/next-icon.svg";
 
+/**
+ * RoundStart component displays the current prompt and provides a button to start song selection.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.currentPrompt - The current game prompt to display
+ * @param {Function} props.onStartSelection - Callback function when user clicks to start song selection
+ * @returns {JSX.Element} Rendered component
+ */
 export default function RoundStart({ currentPrompt, onStartSelection }) {
   return (
     <div className="flex flex-col items-center gap-10">
-      <h1 className="text-7xl font-bold text-center">The prompt is:</h1>
+      <h1 className="text-7xl font-bold text-center text-white">The prompt is:</h1>
 
       <SearchBar
         value={currentPrompt || ""}

@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+/**
+ * SpotifyCallback component handles the OAuth callback from Spotify.
+ * Processes the authorization code and exchanges it for access and refresh tokens.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 export default function SpotifyCallback() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,6 +35,9 @@ export default function SpotifyCallback() {
       return;
     }
 
+    /**
+     * Fetches access and refresh tokens from Spotify using the authorization code
+     */
     const fetchToken = async () => {
       const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
       const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
@@ -55,7 +64,6 @@ export default function SpotifyCallback() {
           console.error("Error fetching token:", data);
           navigate("/");
         } else {
-          
           // Calculate and store the token expiry time in milliseconds
           const expiryTime = Date.now() + data.expires_in * 1000;
           localStorage.setItem("spotify_access_token", data.access_token);

@@ -3,6 +3,18 @@ import record from '../../assets/record.svg';
 import SearchBar from '../../components/SearchBar';
 import SpotifyPlayer from 'react-spotify-web-playback';
 
+/**
+ * RatingScreen component provides an interface for rating songs during the game.
+ * Includes song playback, album art display, and a 5-star rating system.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.currentPrompt - The current game prompt
+ * @param {Object} props.songToRate - The song object to be rated
+ * @param {Function} props.onSubmitRating - Callback when rating is submitted
+ * @param {number} props.currentIndex - Current song index in the rating sequence
+ * @param {number} props.totalSongs - Total number of songs to rate
+ * @returns {JSX.Element} Rendered component
+ */
 const RatingScreen = ({ 
   currentPrompt,
   songToRate, 
@@ -14,10 +26,18 @@ const RatingScreen = ({
   // Get the Spotify token from localStorage
   const spotifyToken = localStorage.getItem('spotify_access_token');
 
+  /**
+   * Handles clicking a rating record
+   * @param {number} index - The index of the selected rating (0-4)
+   */
   const handleRatingClick = (index) => {
     setSelectedRating(index);
   };
 
+  /**
+   * Handles submitting the rating
+   * Validates that a rating has been selected before submitting
+   */
   const handleSubmit = () => {
     if (selectedRating >= 0) {
       // Add 1 to the index to get rating from 1-5 instead of 0-4

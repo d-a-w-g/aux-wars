@@ -6,6 +6,12 @@ import PlayerResult from '../../components/PlayerResult';
 import AnimatedLogo from '../../components/AnimatedLogo';
 import backIcon from '../../assets/back-icon.svg';
 
+/**
+ * GameWinner component displays the final game results showing the winner and all players' stats.
+ * Includes animations, navigation controls, and handles game state transitions.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 export default function GameWinner() {
   const { gameCode } = useParams();
   const navigate = useNavigate();
@@ -15,6 +21,7 @@ export default function GameWinner() {
   const { state, dispatch } = useGame();
   const { allRoundResults } = state;
 
+  // Handle game transition animation
   useEffect(() => {
     setGameTransition(true);
     const timer = setTimeout(() => {
@@ -23,22 +30,33 @@ export default function GameWinner() {
     return () => clearTimeout(timer);
   }, [setGameTransition]);
 
+  // Handle disconnection
   useEffect(() => {
     if (!isConnected) {
       navigate("/lobby", { replace: true });
     }
   }, [isConnected, navigate]);
 
-  // Build player stats: wins, total records, songs per round
+  /**
+   * Builds player statistics from round results including wins, records, and songs.
+   * @returns {Array<Object>} Array of player stats objects with the following properties:
+   *   - playerId: string - Unique identifier for the player
+   *   - playerName: string - Display name of the player
+   *   - wins: number - Number of rounds won
+   *   - totalRecords: number - Total records earned across all rounds
+   *   - songs: Array<Object> - List of songs submitted by the player
+   */
   const buildPlayerStats = () => {
     const stats = {};
     Object.values(allRoundResults || {}).forEach((round, roundIdx) => {
       if (!round.songs) return;
-      // Find the winner song for this round
+      
       const winnerSongId = round.winnerSongId;
+      
       round.songs.forEach(song => {
         const playerId = song.player?.id;
         if (!playerId) return;
+        
         if (!stats[playerId]) {
           stats[playerId] = {
             playerId,
@@ -48,15 +66,15 @@ export default function GameWinner() {
             songs: [],
           };
         }
-        // Add song for this round
+        
         stats[playerId].songs.push({
           ...song,
           round: roundIdx + 1,
           isRoundWinner: song.songId === winnerSongId
         });
-        // Add records
+        
         stats[playerId].totalRecords += song.totalRecords || 0;
-        // Add win if this song was the round winner
+        
         if (song.songId === winnerSongId) {
           stats[playerId].wins += 1;
         }
@@ -65,15 +83,18 @@ export default function GameWinner() {
     return Object.values(stats);
   };
 
-  // Sort: most wins, then most records
+  // Sort players by wins and records
   const sortedPlayers = buildPlayerStats()
     .sort((a, b) => b.wins - a.wins || b.totalRecords - a.totalRecords);
 
-  // Winner is first in sorted list
+  // Separate winner from other players
   const winner = sortedPlayers[0];
-  // Remove winner from the rest of the list
   const rest = sortedPlayers.slice(1);
 
+  /**
+   * Handles returning to the lobby and resetting game state.
+   * Emits a return-to-lobby event to the server and navigates back to the lobby.
+   */
   const handleReturnToLobby = () => {
     setGameTransition(true);
     dispatch({ type: "RESET_GAME" });
@@ -83,7 +104,7 @@ export default function GameWinner() {
 
   return (
     <div className="relative flex flex-col w-full max-w-7xl mx-auto pt-2 pb-2 px-2 md:p-6 bg-transparent items-center">
-      {/* Back button at top left */}
+      {/* Navigation controls */}
       <div className="w-full flex flex-row justify-start mb-2 mt-4">
         <button
           className="flex items-center gap-2 py-2 px-4 rounded-md text-white font-semibold cursor-pointer transition-all bg-[#242424] hover:bg-[#191414]"
@@ -93,11 +114,13 @@ export default function GameWinner() {
           <span>Exit</span>
         </button>
       </div>
-      {/* Animated Logo at the top */}
+
+      {/* Logo section */}
       <div className="flex justify-center w-full mb-4">
         <AnimatedLogo />
       </div>
-      {/* Winner section */}
+
+      {/* Winner display */}
       {winner && (
         <PlayerResult
           playerName={winner.playerName}
@@ -107,7 +130,8 @@ export default function GameWinner() {
           isWinner={true}
         />
       )}
-      {/* All other players list - scrollable if overflow */}
+
+      {/* Other players list */}
       <div className="w-full flex flex-col items-center gap-2 pb-4 overflow-y-auto" style={{ maxHeight: '30vh', minHeight: '10rem' }}>
         {rest.map((player, idx) => (
           <PlayerResult

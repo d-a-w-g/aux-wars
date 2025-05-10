@@ -1,5 +1,15 @@
 import React from "react";
 
+/**
+ * WaitingScreen component displays a loading state while waiting for other players
+ * to complete their actions in the game.
+ * 
+ * @param {Object} props - Component props
+ * @param {number} props.completedCount - Number of players who have completed their action
+ * @param {number} props.totalCount - Total number of players in the game
+ * @param {string} [props.message] - Optional custom message to display
+ * @returns {JSX.Element} Rendered component
+ */
 export default function WaitingScreen({ completedCount, totalCount, message }) {
   const defaultMessage = "Your song has been submitted! Hang tight while everyone else makes their selection.";
   

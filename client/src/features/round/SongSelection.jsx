@@ -2,6 +2,19 @@ import React, { useState } from "react";
 import SearchBar from "../../components/SearchBar";
 import SongList from "../../components/SongList";
 
+/**
+ * SongSelection component provides a search interface for selecting songs
+ * and displays search results in a list.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.searchTerm - Current search term
+ * @param {Function} props.onSearchChange - Callback for search term changes
+ * @param {Array} props.searchResults - List of search results
+ * @param {Function} props.onSelectSong - Callback when a song is selected
+ * @param {Function} props.onShowPrompt - Callback to show the prompt modal
+ * @param {boolean} props.showPromptModal - Whether the prompt modal is visible
+ * @returns {JSX.Element} Rendered component
+ */
 export default function SongSelection({ 
   searchTerm, 
   onSearchChange, 
@@ -12,12 +25,18 @@ export default function SongSelection({
 }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
 
-  // Handle selecting a track
+  /**
+   * Handles selecting a track from the search results
+   * @param {Object} track - The selected track object
+   */
   const handleSelectTrack = (track) => {
     setSelectedTrack(track);
   };
 
-  // Handle final submission
+  /**
+   * Handles confirming the selected track and submitting it
+   * @param {Object} track - The track to submit
+   */
   const handleConfirmTrack = (track) => {
     onSelectSong(track);
   };
@@ -36,14 +55,16 @@ export default function SongSelection({
         />
       </div>
 
-      <SongList 
-        tracks={searchResults} 
-        selectedTrack={selectedTrack}
-        onSelectTrack={handleSelectTrack}
-        onConfirmTrack={handleConfirmTrack} 
-      />
+      <div className="overflow-y-auto">
+        <SongList 
+          tracks={searchResults} 
+          selectedTrack={selectedTrack}
+          onSelectTrack={handleSelectTrack}
+          onConfirmTrack={handleConfirmTrack} 
+        />
+      </div>
 
-      <div className="p-4">
+      <div className="p-4 mt-auto">
         <button
           onClick={onShowPrompt}
           className="green-btn w-full py-3 rounded-md text-black font-semibold cursor-pointer"

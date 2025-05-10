@@ -2,6 +2,10 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * SocketContext provides socket.io connection management for the application.
+ * Handles connection state, reconnection logic, and game phase transitions.
+ */
 const SocketContext = createContext(null);
 
 // Get the server URL from environment variables or use a default
@@ -13,13 +17,22 @@ let socketInstance = null;
 // Track if we're currently transitioning between game phases
 let isInGameTransition = false;
 
+/**
+ * SocketProvider component that manages socket.io connection and provides socket context
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} Provider component
+ */
 export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const ignoreDisconnectsUntil = useRef(0);
 
-  // Function to mark that we're in a game transition
+  /**
+   * Marks that we're in a game transition and temporarily ignores disconnects
+   * @param {boolean} inTransition - Whether we're in a transition
+   */
   const setGameTransition = (inTransition) => {
     isInGameTransition = inTransition;
     if (inTransition) {
@@ -172,6 +185,11 @@ export function SocketProvider({ children }) {
   );
 }
 
+/**
+ * Custom hook to access the socket instance
+ * @returns {Object} Socket.io instance
+ * @throws {Error} If used outside of SocketProvider
+ */
 export function useSocket() {
   const context = useContext(SocketContext);
   if (!context) {
@@ -180,6 +198,11 @@ export function useSocket() {
   return context.socket;
 }
 
+/**
+ * Custom hook to access the socket connection state
+ * @returns {boolean} Whether the socket is connected
+ * @throws {Error} If used outside of SocketProvider
+ */
 export function useSocketConnection() {
   const context = useContext(SocketContext);
   if (!context) {
@@ -188,6 +211,11 @@ export function useSocketConnection() {
   return context.isConnected;
 }
 
+/**
+ * Custom hook to access the game transition state setter
+ * @returns {Function} Function to set game transition state
+ * @throws {Error} If used outside of SocketProvider
+ */
 export function useGameTransition() {
   const context = useContext(SocketContext);
   if (!context) {

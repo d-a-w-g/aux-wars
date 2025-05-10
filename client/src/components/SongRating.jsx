@@ -5,11 +5,19 @@ import SearchBar from './SearchBar';
 import { 
     initializeSpotifyPlayer, 
     playSpotifyTrack, 
-    pauseSpotifyPlayback, 
-    getSpotifyPlayer 
+    pauseSpotifyPlayback
 } from '../services/spotifyApi';
 
+/**
+ * SongRating component displays a song for rating and provides playback controls.
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.track - Spotify track object containing song details
+ * @param {string} props.prompt - Current game prompt
+ * @returns {JSX.Element} Rendered component
+ */
 export default function SongRating({ track, prompt }) {
+    // Get album cover URL from track object, with fallbacks
     const albumCover =
         track.album?.images?.[1]?.url ||
         track.album?.images?.[0]?.url ||
@@ -20,6 +28,7 @@ export default function SongRating({ track, prompt }) {
     const [deviceId, setDeviceId] = useState(null);
     const playerRef = useRef(null);
 
+    // Initialize Spotify player on component mount
     useEffect(() => {
         let mounted = true;
         async function setupPlayer() {
@@ -33,18 +42,24 @@ export default function SongRating({ track, prompt }) {
                     setIsPlaying(state && !state.paused);
                 });
             } catch (err) {
-                // Optionally show error to user
-                console.error('Spotify player error:', err);
+                // Handle error silently - could be enhanced with user notification
             }
         }
         setupPlayer();
         return () => { mounted = false; };
     }, []);
 
+    /**
+     * Handles rating selection by index
+     * @param {number} index - Selected rating index (0-4)
+     */
     const handleClick = (index) => {
         setSelectedIndex(index);
     };
 
+    /**
+     * Toggles play/pause state for the current track
+     */
     const handlePlayPause = async () => {
         if (!deviceId || !track.uri) return;
         try {
@@ -56,17 +71,18 @@ export default function SongRating({ track, prompt }) {
                 setIsPlaying(false);
             }
         } catch (err) {
-            console.error('Playback error:', err);
+            // Handle error silently - could be enhanced with user notification
         }
     };
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen box-border pt-4 pb-24 px-2 sm:pt-8 sm:pb-32 overflow-y-auto">
-            {/* Prompt at the top using SearchBar */}
+            {/* Prompt display */}
             <div className="w-full max-w-2xl mx-auto mb-4">
                 <SearchBar value={prompt || ''} readOnly onChange={() => {}} />
             </div>
-            {/*album cover image*/}
+            
+            {/* Album cover */}
             {albumCover && (
                 <img
                     src={albumCover}
@@ -75,7 +91,8 @@ export default function SongRating({ track, prompt }) {
                     style={{ maxWidth: '80vw', maxHeight: '30vh' }}
                 />
             )}
-            {/* Play/Pause Button */}
+            
+            {/* Play/Pause controls */}
             <button
                 className="mb-2 px-6 py-2 rounded-full bg-[#1db954] text-white font-bold text-lg flex items-center gap-2 shadow hover:bg-[#1ed760] transition-all"
                 onClick={handlePlayPause}
@@ -93,14 +110,16 @@ export default function SongRating({ track, prompt }) {
                 )}
                 {isPlaying ? 'Pause' : 'Play'}
             </button>
-            {/*track name and artist name*/}
+            
+            {/* Track information */}
             <div className="flex flex-col justify-center items-center mt-3">
                 <p className="text-xl sm:text-2xl font-semibold mt-2.5 text-white text-center max-w-[90vw] truncate">{track.name}</p>
                 <p className="text-sm text-gray-300 mb-5 text-center max-w-[90vw] truncate">
                     {track.artists.map((a) => a.name).join(", ")}
                 </p>
             </div>
-            {/*rating system*/}
+            
+            {/* Rating system */}
             <div className="flex flex-row justify-center items-center mb-6">
                 {[...Array(5)].map((_, index) => (
                     <img
@@ -114,7 +133,8 @@ export default function SongRating({ track, prompt }) {
                     />
                 ))}
             </div>
-            {/*submit button*/}
+            
+            {/* Submit button */}
             <div className="fixed left-0 right-0 bottom-0 flex justify-center pb-4 bg-gradient-to-t from-black/80 to-transparent z-20">
                 <button className="bg-[#68d570] text-black font-bold w-full max-w-xs h-[45px] rounded-full cursor-pointer transition-all hover:scale-105 hover:bg-[#7de884]">
                     Submit

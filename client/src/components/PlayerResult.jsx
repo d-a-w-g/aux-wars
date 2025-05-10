@@ -1,6 +1,18 @@
 import React from 'react';
 import recordLogo from './record-logo.svg';
 
+/**
+ * PlayerResult component displays a player's game results with their album covers.
+ * Can be rendered in two different layouts: winner (vertical) or non-winner (horizontal).
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.playerName - Name of the player
+ * @param {string[]} props.albums - Array of album cover URLs
+ * @param {number} props.wins - Number of wins
+ * @param {number} props.totalRecords - Total number of records earned
+ * @param {boolean} [props.isWinner=false] - Whether this player is the winner
+ * @returns {JSX.Element} Rendered component
+ */
 export default function PlayerResult({ playerName, albums, wins, totalRecords, isWinner = false }) {
   const isStack = albums && albums.length > 1;
 

@@ -1,7 +1,15 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
+/**
+ * GameContext provides global state management for the game.
+ * Handles game state, player information, rounds, prompts, and results.
+ */
 const GameContext = createContext();
 
+/**
+ * Initial state for the game context
+ * @type {Object}
+ */
 const initialState = {
   currentPrompt: '',
   players: [],
@@ -43,7 +51,12 @@ const initialState = {
   isGameOver: false, // Whether the game is over
 };
 
-// Add debug helper
+/**
+ * Logs state changes for debugging purposes
+ * @param {Object} action - The action being dispatched
+ * @param {Object} prevState - Previous state
+ * @param {Object} nextState - Next state
+ */
 const logStateChange = (action, prevState, nextState) => {
   console.log(`GameContext: ${action.type}`, {
     prev: {
@@ -58,6 +71,12 @@ const logStateChange = (action, prevState, nextState) => {
   });
 };
 
+/**
+ * Reducer function for managing game state
+ * @param {Object} state - Current state
+ * @param {Object} action - Action to dispatch
+ * @returns {Object} New state
+ */
 const gameReducer = (state, action) => {
   let nextState;
   
@@ -145,7 +164,6 @@ const gameReducer = (state, action) => {
         roundResults: action.payload,
         allRoundResults: updatedAllResults
       };
-      console.log('SET_ROUND_RESULTS with payload:', action.payload);
       logStateChange(action, state, nextState);
       return nextState;
       
@@ -192,6 +210,13 @@ const gameReducer = (state, action) => {
   }
 };
 
+/**
+ * GameProvider component that wraps the application and provides game state
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @param {Object} [props.initialState] - Optional initial state
+ * @returns {JSX.Element} Provider component
+ */
 export const GameProvider = ({ children, initialState: initialGameState = initialState }) => {
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
 
@@ -209,6 +234,11 @@ export const GameProvider = ({ children, initialState: initialGameState = initia
   );
 };
 
+/**
+ * Custom hook to access the game context
+ * @returns {Object} Game context containing state and dispatch
+ * @throws {Error} If used outside of GameProvider
+ */
 export const useGame = () => {
   const context = useContext(GameContext);
   if (!context) {

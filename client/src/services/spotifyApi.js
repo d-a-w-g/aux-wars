@@ -1,4 +1,7 @@
-// Helper function to check if the access token is still valid
+/**
+ * Checks if the Spotify access token is still valid
+ * @returns {boolean} Whether the token is valid
+ */
 export function isTokenValid() {
   const accessToken = localStorage.getItem("spotify_access_token");
   const expiry = localStorage.getItem("spotify_token_expiry");
@@ -6,7 +9,11 @@ export function isTokenValid() {
   return Date.now() < parseInt(expiry, 10);
 }
 
-// Function to refresh the Spotify access token using the refresh token
+/**
+ * Refreshes the Spotify access token using the refresh token
+ * @returns {Promise<string>} The new access token
+ * @throws {Error} If refresh fails
+ */
 export async function refreshSpotifyToken() {
   const refreshToken = localStorage.getItem("spotify_refresh_token");
   const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -44,7 +51,11 @@ export async function refreshSpotifyToken() {
   }
 }
 
-// Search for tracks on Spotify.
+/**
+ * Searches for tracks on Spotify
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Array of track objects or error object
+ */
 export async function searchSpotifyTracks(query) {
   let accessToken = localStorage.getItem("spotify_access_token");
   if (!isTokenValid()) {
@@ -88,6 +99,10 @@ export async function searchSpotifyTracks(query) {
 let spotifyPlayer = null;
 let playerReadyPromise = null;
 
+/**
+ * Loads the Spotify Web Playback SDK
+ * @returns {Promise<void>} Promise that resolves when SDK is loaded
+ */
 export function loadSpotifySDK() {
   // Only load once
   if (window.Spotify) return Promise.resolve();
@@ -108,6 +123,12 @@ export function loadSpotifySDK() {
   return playerReadyPromise;
 }
 
+/**
+ * Initializes the Spotify Web Playback SDK player
+ * @param {string} [name='Aux Wars Player'] - Name of the player
+ * @returns {Promise<Object>} Object containing player instance and device ID
+ * @throws {Error} If initialization fails
+ */
 export async function initializeSpotifyPlayer(name = 'Aux Wars Player') {
   await loadSpotifySDK();
   if (spotifyPlayer) return spotifyPlayer;
@@ -140,10 +161,20 @@ export async function initializeSpotifyPlayer(name = 'Aux Wars Player') {
   });
 }
 
+/**
+ * Gets the current Spotify player instance
+ * @returns {Object|null} Spotify player instance or null if not initialized
+ */
 export function getSpotifyPlayer() {
   return spotifyPlayer;
 }
 
+/**
+ * Plays a track on the specified Spotify device
+ * @param {string} trackUri - URI of the track to play
+ * @param {string} deviceId - ID of the device to play on
+ * @throws {Error} If playback fails
+ */
 export async function playSpotifyTrack(trackUri, deviceId) {
   const token = localStorage.getItem('spotify_access_token');
   if (!token) throw new Error('No Spotify access token');
@@ -158,6 +189,11 @@ export async function playSpotifyTrack(trackUri, deviceId) {
   if (!res.ok) throw new Error('Failed to play track');
 }
 
+/**
+ * Pauses playback on the specified Spotify device
+ * @param {string} deviceId - ID of the device to pause
+ * @throws {Error} If pause fails
+ */
 export async function pauseSpotifyPlayback(deviceId) {
   const token = localStorage.getItem('spotify_access_token');
   if (!token) throw new Error('No Spotify access token');
@@ -170,6 +206,10 @@ export async function pauseSpotifyPlayback(deviceId) {
   if (!res.ok) throw new Error('Failed to pause playback');
 }
 
+/**
+ * Gets the current playback state from the Spotify player
+ * @returns {Object|null} Current playback state or null if not available
+ */
 export function getSpotifyPlaybackState() {
   if (!spotifyPlayer) return null;
   return spotifyPlayer.getCurrentState();

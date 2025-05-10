@@ -10,14 +10,18 @@ import { GameProvider } from "./services/GameContext";
 import Round from "./features/round/Round";
 import RoundWinner from "./features/round-winner/RoundWinner";
 import GameWinner from "./features/round-winner/GameWinner";
-import SongRating from "./components/SongRating";
-import HowToPlay from "./features/how_to_play/HowToPlay";
 
+/**
+ * App component serves as the root component of the application.
+ * Sets up routing, game state management, and socket connection.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 export default function App() {
   return (
     <Router>
-    <GameProvider>
-      <SocketProvider>
+      <GameProvider>
+        <SocketProvider>
           <Routes>
             <Route path="/" element={<AppDisplay />}>
               <Route index element={<Login />} />
@@ -27,11 +31,10 @@ export default function App() {
               <Route path="lobby/:gameCode/round" element={<Round />} />
               <Route path="lobby/:gameCode/results" element={<RoundWinner />} />
               <Route path="lobby/:gameCode/gamewinner" element={<GameWinner />} />
-              <Route path="/how_to_play" element={<HowToPlay />} />
             </Route>
           </Routes>
-      </SocketProvider>
-    </GameProvider>
+        </SocketProvider>
+      </GameProvider>
     </Router>
   );
 }

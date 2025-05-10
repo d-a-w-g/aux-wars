@@ -1,16 +1,24 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import spotifyIcon from "../../assets/spotify-icon.svg";
 import AnimatedLogo from "../../components/AnimatedLogo";
 import HomeBtn from "../../components/HomeBtn";
+import HowToPlayModal from "../../components/HowToPlayModal";
 import {
   generateRandomString,
   generateCodeChallenge,
 } from "../../services/spotifyAuth";
 import { isTokenValid } from "../../services/spotifyApi";
 
+/**
+ * Login component handles user authentication with Spotify and guest access.
+ * Provides options to login with Spotify or play as a guest.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 export default function Login() {
   const navigate = useNavigate();
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
 
   useEffect(() => {
     // Check token validity on mount
@@ -20,6 +28,10 @@ export default function Login() {
     }
   }, [navigate]);
 
+  /**
+   * Handles user login based on the selected login type
+   * @param {string} loginType - Type of login ('spotify' or 'guest')
+   */
   const handleLogin = async (loginType) => {
     if (loginType === "spotify") {
       // 1) If the token in localStorage is still valid, go to lobby immediately
@@ -96,10 +108,18 @@ export default function Login() {
         </div>
       </div>
       <div className="text-center pb-6 text-white">
-        <p className="text-sm md:text-base cursor-pointer hover:underline">
+        <button 
+          onClick={() => setShowHowToPlay(true)}
+          className="text-sm md:text-base hover:underline transition-colors"
+        >
           How to play
-        </p>
+        </button>
       </div>
+
+      <HowToPlayModal 
+        showModal={showHowToPlay}
+        onClose={() => setShowHowToPlay(false)}
+      />
     </div>
   );
 }

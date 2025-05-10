@@ -8,6 +8,12 @@ import { useGame } from "../../services/GameContext";
 import logo from "../../assets/aux-wars-logo.svg";
 import settingsIcon from "../../assets/settings-btn.svg";
 
+/**
+ * Lobby component manages the game lobby where players can join, set their names,
+ * and prepare for the game. Handles game settings, player management, and game start.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 export default function Lobby() {
   const socket = useSocket();
   const navigate = useNavigate();
@@ -23,13 +29,17 @@ export default function Lobby() {
   const allPlayersReady = players.every((player) => player.isReady);
   const isConnected = useSocketConnection();
 
+  // Initialize game connection and player management
   useEffect(() => {
     if (!socket) {
       navigate("/lobby");
       return;
     }
 
-    // Create a function to handle the join game logic
+    /**
+     * Handles joining a game with the given code
+     * @param {string} code - Game code to join
+     */
     const joinGame = (code) => {
       socket.emit("join-game", { gameCode: code, name }, (response) => {
         if (!response.success) {
@@ -65,6 +75,7 @@ export default function Lobby() {
     };
   }, [socket, routeGameCode, navigate, name]);
 
+  // Update host status when players change
   useEffect(() => {
     const currentPlayer = players.find((player) => player.id === socket?.id);
     if (currentPlayer) setIsHost(currentPlayer.isHost);
@@ -120,6 +131,9 @@ export default function Lobby() {
     return () => socket.off("game-started");
   }, [socket, gameCode, navigate, dispatch]);
 
+  /**
+   * Handles leaving the game and returning to home
+   */
   const handleLeaveGame = () => {
     if (gameCode) {
       socket.emit("leave-game", { gameCode });
@@ -132,6 +146,9 @@ export default function Lobby() {
     transition: { duration: 1, repeat: 3, ease: "easeInOut" },
   };
 
+  /**
+   * Handles toggling player ready status
+   */
   const handleReady = () => {
     if (!name.trim()) {
       alert("Please set your nickname before readying up.");
@@ -141,17 +158,10 @@ export default function Lobby() {
     socket.emit("update-player-name", { gameCode, name, isReady: !isReady });
   };
 
-  // Add a function to handle starting the game
+  /**
+   * Handles starting the game with validation checks
+   */
   const handleStartGame = () => {
-    console.log("Attempting to start game...");
-    console.log("Socket connection state:", { 
-      socket: !!socket, 
-      isConnected, 
-      isHost, 
-      allPlayersReady,
-      playerCount: players.length 
-    });
-
     if (!socket) {
       console.error("No socket instance available");
       return;
@@ -164,7 +174,6 @@ export default function Lobby() {
       // Wait a moment for the connection to establish
       setTimeout(() => {
         if (socket.connected) {
-          console.log("Socket reconnected, starting game...");
           socket.emit("start-game", { gameCode });
         } else {
           console.error("Failed to reconnect socket");
@@ -188,7 +197,6 @@ export default function Lobby() {
       return;
     }
 
-    console.log("Starting game...");
     socket.emit("start-game", { gameCode });
   };
 

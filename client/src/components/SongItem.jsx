@@ -2,8 +2,20 @@ import React from "react";
 import { motion } from "framer-motion";
 import nextIcon from "../assets/next-icon.svg";
 
+/**
+ * SongItem component displays a single song with its album cover, name, artist, and album.
+ * Includes a select button that appears when the song is selected.
+ * Uses Framer Motion for animations.
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.track - Track object containing song details
+ * @param {boolean} props.selected - Whether this song is currently selected
+ * @param {Function} props.onSelect - Callback when the song is clicked
+ * @param {Function} props.onSelectSong - Callback when the select button is clicked
+ * @returns {JSX.Element} Rendered component
+ */
 export default function SongItem({ track, selected, onSelect, onSelectSong }) {
-  // Attempt to get a medium/small album image
+  // Get the best available album cover image
   const albumCover =
     track.album?.images?.[1]?.url ||
     track.album?.images?.[0]?.url ||
@@ -19,8 +31,9 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
       }`}
       onClick={() => onSelect(track)}
     >
-      {/* Song Info */}
+      {/* Song info section */}
       <div className="flex items-center gap-4 w-full">
+        {/* Album cover */}
         {albumCover && (
           <img
             src={albumCover}
@@ -28,6 +41,8 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
             className="w-16 h-16 object-cover rounded-md"
           />
         )}
+        
+        {/* Track details */}
         <div className="flex flex-col justify-center flex-1">
           <p className="font-semibold">{track.name}</p>
           <p className="text-sm text-gray-300">
@@ -38,7 +53,7 @@ export default function SongItem({ track, selected, onSelect, onSelectSong }) {
           </p>
         </div>
 
-        {/* "Select Song" Button (Only Show If Selected) */}
+        {/* Select button - only shown when song is selected */}
         {selected && (
           <motion.button
             initial={{ opacity: 0, x: 10 }}
