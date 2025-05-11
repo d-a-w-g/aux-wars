@@ -1,6 +1,6 @@
 // Test suite for song selection functionality in multiplayer game
 import { io as Client } from "socket.io-client"
-import { server, gameRooms } from "./server.js"
+import { server, gameRooms } from "../server.js"
 import { describe, beforeAll, afterAll, it, expect } from '@jest/globals'
 
 describe('Song Selection Tests', () => {

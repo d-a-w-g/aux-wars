@@ -1,6 +1,6 @@
 // Test suite for basic server functionality and game creation
 import { io as Client } from "socket.io-client"
-import { server } from "./server.js"
+import { server } from "../server.js"
 import { describe, beforeAll, afterAll, it, expect } from '@jest/globals'
 
 describe('Server Tests', () => {
